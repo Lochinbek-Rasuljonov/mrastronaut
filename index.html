@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" data-key="meta_desc" content="Professional raqamli xizmatlar: veb-saytlar, dizayn, Telegram botlar, server sozlamalari va e-tijorat tizimlari. Hoziroq buyurtma bering!" />
+  <title data-key="page_title">MrAstronaut — Professional raqamli xizmatlar</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://db.onlinewebfonts.com/c/8cb707a9b8a73f8a7403336b861c3074?family=BubbledotICG-FinePos" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="styles.css?v=10" />
+</head>
+<body>
+
+<!-- ░░ HEADER ░░ -->
+<header class="header" id="header">
+  <div class="header-inner">
+    <a href="#hero" class="logo" aria-label="MrAstronaut">
+      <img src="assets/logo.webp" alt="" width="52" height="52" />
+    </a>
+    <nav class="nav-pill" aria-label="Main navigation">
+      <a href="#hero"         class="nav-link active" data-key="nav_home">Asosiy</a>
+      <a href="#services"     class="nav-link" data-key="nav_services">Xizmatlar</a>
+      <a href="#why-us"       class="nav-link" data-key="nav_why">Afzalliklar</a>
+      <a href="#contact"      class="nav-link" data-key="nav_contact">Aloqa</a>
+    </nav>
+    <div class="header-right">
+      <div class="lang-row">
+        <button class="lang-btn active" data-lang="uz" data-key="lang_uz">UZ</button>
+        <button class="lang-btn" data-lang="cy" data-key="lang_cy">ЎЗ</button>
+        <button class="lang-btn" data-lang="ru" data-key="lang_ru">RU</button>
+        <button class="lang-btn" data-lang="en" data-key="lang_en">EN</button>
+      </div>
+      <a href="#contact" class="sign-in" data-key="nav_cta">Boshlash</a>
+    </div>
+    <button class="burger" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- ░░ MOBILE MENU ░░ -->
+<div class="overlay" id="overlay" aria-hidden="true"></div>
+<div class="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" hidden>
+  <nav class="mobile-nav">
+    <a href="#hero"      class="mobile-link active" data-key="nav_home"      style="--li:0">Asosiy</a>
+    <a href="#services"  class="mobile-link"         data-key="nav_services"  style="--li:1">Xizmatlar</a>
+    <a href="#why-us"    class="mobile-link"         data-key="nav_why"       style="--li:2">Afzalliklar</a>
+    <a href="#contact"   class="mobile-link"         data-key="nav_contact"   style="--li:3">Aloqa</a>
+  </nav>
+  <div class="mobile-langs" style="--li:4">
+    <button class="lang-btn active" data-lang="uz" data-key="lang_uz">UZ</button>
+    <button class="lang-btn" data-lang="cy" data-key="lang_cy">ЎЗ</button>
+    <button class="lang-btn" data-lang="ru" data-key="lang_ru">RU</button>
+    <button class="lang-btn" data-lang="en" data-key="lang_en">EN</button>
+  </div>
+  <a href="#contact" class="mobile-cta" data-key="nav_cta" style="--li:5">Boshlash</a>
+</div>
+
+<!-- ░░ HERO ░░ -->
+<section class="hero" id="hero">
+  <div class="bg">
+    <video class="bg-video" autoplay muted loop playsinline>
+      <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260809_012548_ef22562c-c0ae-4816-ad9d-f8922af4e6a7.mp4" type="video/mp4" />
+    </video>
+    <div class="bg-overlay"></div>
+  </div>
+  <div class="hero-content">
+
+    <h1 class="headline">
+      <span class="hl-line anim" data-key="hero_h1" style="--d:.12s">G‘oya sizdan.</span>
+      <span class="hl-line anim" data-key="hero_h2" style="--d:.28s">Natija bizdan.</span>
+    </h1>
+    <p class="subhead anim" data-key="hero_sub" style="--d:.32s">
+      Katta loyihalar, zamonaviy veb-saytlar va aqlli botlar — xavfsiz, tezkor va aynan sizning biznesingizga moslab yaratiladi.
+    </p>
+    <div class="hero-ctas anim" style="--d:.42s">
+      <a href="#contact" class="cta-primary" data-key="hero_cta1">Hozir boshlash</a>
+      <a href="#services" class="cta-ghost" data-key="hero_cta2">Xizmatlarni ko‘rish ↓</a>
+    </div>
+  </div>
+  <div class="stats-bar">
+    <div class="stat-item anim" style="--d:.5s">
+      <span class="stat-num" data-key="stat1_val" data-target="45" data-suffix="+" data-decimals="0">45+</span>
+      <span class="stat-lbl" data-key="stat1">Bajarilgan loyihalar</span>
+    </div>
+    <div class="stat-div"></div>
+    <div class="stat-item anim" style="--d:.58s">
+      <span class="stat-num" data-key="stat2_val" data-target="99" data-suffix="%" data-decimals="0">99%</span>
+      <span class="stat-lbl" data-key="stat2">Mijozlar mamnuniyati</span>
+    </div>
+    <div class="stat-div"></div>
+    <div class="stat-item anim" style="--d:.66s">
+      <span class="stat-num" data-key="stat3_val" data-target="3" data-suffix="+" data-decimals="0">3+</span>
+      <span class="stat-lbl" data-key="stat3">Yillik tajriba</span>
+    </div>
+    <div class="stat-div"></div>
+    <div class="stat-item anim" style="--d:.74s">
+      <span class="stat-num" data-key="stat4_val" data-target="15" data-suffix="m" data-decimals="0">15m</span>
+      <span class="stat-lbl" data-key="stat4">Javob berish vaqti</span>
+    </div>
+  </div>
+  <a href="#services" class="scroll-hint" aria-label="Scroll down">
+    <span></span>
+  </a>
+</section>
+
+<!-- ░░ SERVICES ░░ -->
+<section class="section" id="services">
+  <div class="section-inner">
+    <div class="sec-head">
+      <span class="sec-tag" data-key="sec_services_tag">// XIZMATLAR</span>
+      <h2 class="sec-title" data-key="sec_services_title">Biz nimalar quramiz?</h2>
+      <p class="sec-sub" data-key="sec_services_sub">Har bir xizmat professional darajada bajariladi — biznesingiz ajralib turishi va doimiy daromad keltirishi uchun.</p>
+    </div>
+    <div class="services-grid">
+
+      <div class="svc-card" data-index="0">
+        <div class="svc-icon-wrap"><i class="fas fa-laptop-code svc-icon"></i></div>
+        <h3 data-key="svc1_t">Veb-saytlar va Landinglar</h3>
+        <p data-key="svc1_d">Tezkor, zamonaviy va mobil qurilmalarda mukammal ishlaydigan saytlar. Google qidiruv tizimida yuqori o‘rinlarga chiqadi.</p>
+        <ul>
+          <li data-key="svc1_f1">Barcha ekranlarga moslashuvchan</li>
+          <li data-key="svc1_f2">SEO va Google uchun qulay</li>
+          <li data-key="svc1_f3">Yuqori tezlikda ishlaydi</li>
+        </ul>
+        <a href="#contact" class="svc-cta" data-key="svc_order">Buyurtma berish →</a>
+      </div>
+
+      <div class="svc-card featured-card" data-index="1">
+        <div class="feat-badge" data-key="most_popular">Eng ommabop</div>
+        <div class="svc-icon-wrap"><i class="fas fa-brain svc-icon"></i></div>
+        <h3 data-key="svc2_t">Qulay Ko‘rinish Dizayni (UI/UX)</h3>
+        <p data-key="svc2_d">Foydalanuvchilarni charchatmaydigan, tushunarli va e’tiborni tortadigan zamonaviy dizaynlar.</p>
+        <ul>
+          <li data-key="svc2_f1">Foydalanuvchilarni o‘rganish</li>
+          <li data-key="svc2_f2">To‘liq interaktiv maketlar</li>
+          <li data-key="svc2_f3">Harakatli animatsiyalar</li>
+        </ul>
+        <a href="#contact" class="svc-cta" data-key="svc_order">Buyurtma berish →</a>
+      </div>
+
+      <div class="svc-card" data-index="2">
+        <div class="svc-icon-wrap"><i class="fas fa-server svc-icon"></i></div>
+        <h3 data-key="svc3_t">Murakkab Backend va API</h3>
+        <p data-key="svc3_d">Sayt va ilovalaringiz uchun xavfsiz, yuqori tezlikda ishlovchi mantiqiy tizimlarni (Python, Django) quramiz.</p>
+        <ul>
+          <li data-key="svc3_f1">Xavfsiz loyiha arxitekturasi</li>
+          <li data-key="svc3_f2">Tezkor va qulay REST API</li>
+          <li data-key="svc3_f3">Katta yuklamalarga chidamli</li>
+        </ul>
+        <a href="#contact" class="svc-cta" data-key="svc_order">Buyurtma berish →</a>
+      </div>
+
+      <div class="svc-card" data-index="3">
+        <div class="svc-icon-wrap"><i class="fas fa-mobile-screen-button svc-icon"></i></div>
+        <h3 data-key="svc4_t">Telegram Bot va Mini App</h3>
+        <p data-key="svc4_d">Telegramdan chiqmagan holda ilovadek ishlaydigan zamonaviy Web Applar va aqlli botlar yaratamiz.</p>
+        <ul>
+          <li data-key="svc4_f1">Telegram Mini App (TMA)</li>
+          <li data-key="svc4_f2">Biznesni avtomatlashtirish</li>
+          <li data-key="svc4_f3">Mijozlar boshqaruv paneli</li>
+        </ul>
+        <a href="#contact" class="svc-cta" data-key="svc_order">Buyurtma berish →</a>
+      </div>
+
+      <div class="svc-card" data-index="4">
+        <div class="svc-icon-wrap"><i class="fas fa-database svc-icon"></i></div>
+        <h3 data-key="svc5_t">Server va Ma’lumotlar Bazasi</h3>
+        <p data-key="svc5_d">Loyiha hech qachon to‘xtab qolmasligi uchun serverlarni sozlash, xavfsizlik va zaxiralashni ta’minlash.</p>
+        <ul>
+          <li data-key="svc5_f1">Serverlarni to‘g‘ri sozlash</li>
+          <li data-key="svc5_f2">Ma’lumotlar xavfsizligi</li>
+          <li data-key="svc5_f3">Doimiy uzluksiz ishlash</li>
+        </ul>
+        <a href="#contact" class="svc-cta" data-key="svc_order">Buyurtma berish →</a>
+      </div>
+
+      <div class="svc-card" data-index="5">
+        <div class="svc-icon-wrap"><i class="fas fa-cart-shopping svc-icon"></i></div>
+        <h3 data-key="svc6_t">Internet-do‘konlar</h3>
+        <p data-key="svc6_d">Sotuvni oshirish uchun maxsus saytlar. To‘lov tizimlari va mahsulotlarni boshqarish paneli bilan.</p>
+        <ul>
+          <li data-key="svc6_f1">To‘lov tizimlarini ulash</li>
+          <li data-key="svc6_f2">Mahsulotlar va ombor hisobi</li>
+          <li data-key="svc6_f3">Savdo hisobotlari paneli</li>
+        </ul>
+        <a href="#contact" class="svc-cta" data-key="svc_order">Buyurtma berish →</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ░░ PROCESS ░░ -->
+<section class="section section-alt" id="process">
+  <div class="section-inner">
+    <div class="sec-head">
+      <span class="sec-tag" data-key="sec_process_tag">// ISHLASH TARTIBI</span>
+      <h2 class="sec-title" data-key="sec_process_title">Qanday ishlaymiz?</h2>
+      <p class="sec-sub" data-key="sec_process_sub">Oddiy, ochiq-oydin va aniq — birinchi xabardan boshlab to loyihani to‘liq topshirguncha.</p>
+    </div>
+    <div class="process-steps">
+      <div class="proc-step">
+        <div class="proc-num" data-key="proc1_num">01</div>
+        <div class="proc-icon"><i class="fa-solid fa-comments"></i></div>
+        <h3 data-key="proc1_t">Tanishuv</h3>
+        <p data-key="proc1_d">Maqsadlaringiz, loyiha ko‘lami va muddatlarni muhokama qilamiz. Bepul maslahatlashuv.</p>
+      </div>
+      <div class="proc-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+      <div class="proc-step">
+        <div class="proc-num" data-key="proc2_num">02</div>
+        <div class="proc-icon"><i class="fa-solid fa-compass-drafting"></i></div>
+        <h3 data-key="proc2_t">Loyiha arxitekturasi</h3>
+        <p data-key="proc2_d">Sayt tuzilmasi va dizaynini tayyorlaymiz. Har bir detal to‘liq ma’qul bo‘lmaguncha kelishamiz.</p>
+      </div>
+      <div class="proc-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+      <div class="proc-step">
+        <div class="proc-num" data-key="proc3_num">03</div>
+        <div class="proc-icon"><i class="fa-solid fa-code"></i></div>
+        <h3 data-key="proc3_t">Dasturlash</h3>
+        <p data-key="proc3_d">Xatosiz, har tomonlama sinovdan o‘tgan va tez ishlaydigan zamonaviy kod yoziladi.</p>
+      </div>
+      <div class="proc-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+      <div class="proc-step">
+        <div class="proc-num" data-key="proc4_num">04</div>
+        <div class="proc-icon"><i class="fa-solid fa-rocket"></i></div>
+        <h3 data-key="proc4_t">Topshirish va qo‘llab-quvvatlash</h3>
+        <p data-key="proc4_d">Loyihani serverga joylab, ishga tushiramiz va 30 kun davomida bepul texnik yordam beramiz.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ░░ WHY US ░░ -->
+<section class="section" id="why-us">
+  <div class="section-inner">
+    <div class="sec-head">
+      <span class="sec-tag" data-key="sec_why_tag">// AFZALLIKLAR</span>
+      <h2 class="sec-title" data-key="sec_why_title">Raqobatchilardan O‘zish Vaqti</h2>
+      <p class="sec-sub" data-key="sec_why_sub">Ijtimoiy tarmoqlar o‘tkinchi. Shaxsiy veb-saytingiz va botingiz esa doimiy daromad manbayidir.</p>
+    </div>
+    
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="why-icon">
+          <i class="fas fa-robot"></i>
+          <div class="nano-banana"></div>
+        </div>
+        <h3 data-key="why1_t">24/7 Avtomat Savdo</h3>
+        <p data-key="why1_d">Xodimlar dam oladi, Telegram bot va saytingiz esa to‘xtovsiz ishlaydi. Tun-u kun buyurtmalar qabul qilinadi va hisoblanadi.</p>
+      </div>
+      
+      <div class="why-card">
+        <div class="why-icon">
+          <i class="fas fa-shield-alt"></i>
+          <div class="nano-banana"></div>
+        </div>
+        <h3 data-key="why2_t">Mutlaq Ishonch</h3>
+        <p data-key="why2_d">Mijozlar chiroyli va tezkor ishlaydigan IT-tizimiga ega bo‘lgan bizneslarga bir necha barobar ko‘proq ishonadi.</p>
+      </div>
+      
+      <div class="why-card">
+        <div class="why-icon">
+          <i class="fas fa-chart-line"></i>
+          <div class="nano-banana"></div>
+        </div>
+        <h3 data-key="why3_t">Chegarasiz O‘sish</h3>
+        <p data-key="why3_d">Faqatgina Instagram yoki Telegram obunachilariga bog‘lanib qolmang. Google orqali butun bozorga chiqing.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ░░ URGENCY ░░ -->
+<section class="urgency-section">
+  <div class="section-inner urgency-inner">
+    <div class="urgency-left">
+      <span class="urg-tag" data-key="urg_tag">// CHEKLANGAN QABUL</span>
+      <h2 data-key="urg_title">Bu Oyda Faqat 2 ta Joy Qoldi</h2>
+      <p data-key="urg_sub">Yuqori sifatni saqlash maqsadida har oy faqat sanoqli loyihalarni qabul qilaman. Joylar to‘lgach — navbat kutishingizga to‘g‘ri keladi.</p>
+      <div class="slots">
+        <div class="slot taken"></div>
+        <div class="slot taken"></div>
+        <div class="slot taken"></div>
+        <div class="slot open blink"></div>
+        <div class="slot open blink" style="animation-delay:.4s"></div>
+      </div>
+      <p class="slots-label"><span data-key="urg_filled">3 ta loyiha boshlangan</span><span class="urg-open" data-key="urg_left">2 ta bo‘sh joy qoldi</span></p>
+    </div>
+    <div class="urgency-right">
+      <a href="#contact" class="urg-cta" data-key="urg_cta">Joyingizni band qiling →</a>
+      <p class="urg-note" data-key="urg_note">Bepul maslahatlashuv · Majburiyatlarsiz</p>
+    </div>
+  </div>
+</section>
+
+<!-- ░░ FAQ ░░ -->
+<section class="section" id="faq">
+  <div class="section-inner">
+    <div class="sec-head">
+      <span class="sec-tag" data-key="sec_faq_tag">// SAVOL-JAVOB</span>
+      <h2 class="sec-title" data-key="sec_faq_title">Ko‘p So‘raladigan Savollar</h2>
+    </div>
+    <div class="faq-list">
+      <details class="faq-item">
+        <summary data-key="faq1_q">Loyiha tayyor bo‘lishi uchun qancha vaqt ketadi?</summary>
+        <p data-key="faq1_a">Oddiy veb-saytlar uchun: 1–2 hafta. Katta loyihalar va botlar uchun: 4–8 hafta. Muddatlar oldindan aniq kelishiladi va qat’iy rioya qilinadi.</p>
+      </details>
+      <details class="faq-item">
+        <summary data-key="faq2_q">Xizmat narxlari qanday belgilanadi?</summary>
+        <p data-key="faq2_a">Narx loyihaning hajmi va funksionaliga bog‘liq. Byudjetingizga eng mos keluvchi optimal yechimni tanlash uchun bepul maslahat beramiz.</p>
+      </details>
+      <details class="faq-item">
+        <summary data-key="faq3_q">Ma’lumotlarimiz xavfsizligiga kafolat bormi?</summary>
+        <p data-key="faq3_a">Albatta. Eng so‘nggi sanoat xavfsizlik standartlaridan foydalanib, kodingiz va mijozlaringiz ma’lumotlarini to‘liq himoya qilamiz.</p>
+      </details>
+      <details class="faq-item">
+        <summary data-key="faq4_q">To‘lov qanday tartibda amalga oshiriladi?</summary>
+        <p data-key="faq4_a">Ishni boshlash uchun kelishilgan mablag‘ning 50 foizi avans sifatida to‘lanadi, qolgan 50 foizi loyiha to‘liq topshirilganda to‘lanadi.</p>
+      </details>
+      <details class="faq-item">
+        <summary data-key="faq5_q">Loyiha topshirilgandan keyin ham qo‘llab-quvvatlaysizmi?</summary>
+        <p data-key="faq5_a">Ha. Loyiha ishga tushirilgach, 30 kun davomida har qanday texnik masalalar bo‘yicha bepul kafolatli yordam beramiz.</p>
+      </details>
+      <details class="faq-item">
+        <summary data-key="faq6_q">Loyihani kelajakda kengaytirish mumkinmi?</summary>
+        <p data-key="faq6_a">Albatta. Biz yozgan toza va modulli arxitektura kelajakda yangi funksiyalar va imkoniyatlarni osonlik bilan qo‘shishga to‘liq moslashgan.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ░░ CONTACT ░░ -->
+<section class="section section-alt" id="contact">
+  <div class="section-inner">
+    <div class="sec-head">
+      <span class="sec-tag" data-key="sec_contact_tag">// ALOQA</span>
+      <h2 class="sec-title" data-key="sec_contact_title">Birgalikda Ajoyib Loyiha Yaratamiz</h2>
+      <p class="sec-sub" data-key="sec_contact_sub">Loyihangiz haqida yozib qoldiring — 24 soat ichida batafsil javob yozaman.</p>
+    </div>
+    <div class="contact-grid">
+
+      <div class="contact-info">
+        <div class="ci-promises">
+          <div class="promise"><span><i class="fa-solid fa-bolt"></i></span><div><strong data-key="p1_t">Tezkor javob</strong><p data-key="p1_d">Sizni kutdirmasdan, 24 soat ichida aniq va batafsil javob qaytaraman.</p></div></div>
+          <div class="promise"><span><i class="fa-solid fa-shield-halved"></i></span><div><strong data-key="p2_t">Sifat kafolati</strong><p data-key="p2_d">Kutilgan natija va talablaringizga to‘liq mos kelishi kafolatlanadi.</p></div></div>
+          <div class="promise"><span><i class="fa-solid fa-lock"></i></span><div><strong data-key="p3_t">Maxfiylik</strong><p data-key="p3_d">Sizning biznes g‘oyalaringiz va ma’lumotlaringiz to‘liq xavfsiz saqlanadi.</p></div></div>
+          <div class="promise"><span><i class="fa-solid fa-comments"></i></span><div><strong data-key="p4_t">Bepul maslahat</strong><p data-key="p4_d">Boshlashdan oldin barcha texnik detallarni batafsil tushuntirib beraman.</p></div></div>
+        </div>
+
+      </div>
+
+      <form class="contact-form" id="contactForm" novalidate>
+        <div class="field">
+          <label for="f-name" data-key="f_name">Ismingiz</label>
+          <input type="text" id="f-name" name="name" required autocomplete="name" data-key="f_ph_name" placeholder="Masalan: Aziz Rahimov" />
+          <span class="f-err" data-key="f_err_name">Iltimos, ismingizni kiriting</span>
+        </div>
+        <div class="field">
+          <label for="f-contact" data-key="f_contact">Telegram yoki Email</label>
+          <input type="text" id="f-contact" name="contact" required data-key="f_ph_contact" placeholder="@username yoki email@example.com" />
+          <span class="f-err" data-key="f_err_contact">Iltimos, aloqa ma’lumotlaringizni kiriting</span>
+        </div>
+        <div class="field">
+          <label for="f-service" data-key="f_service">Qaysi xizmat kerak?</label>
+          <div class="custom-dropdown" id="service-dropdown">
+            <div class="dropdown-selected" data-key="f_sel" tabindex="0" role="combobox" aria-expanded="false" aria-haspopup="listbox">Xizmat turini tanlang...</div>
+            <div class="dropdown-options" role="listbox">
+              <div class="dropdown-opt" role="option" tabindex="0" data-value="web" data-key="f_o1">Veb-sayt yoki Landing</div>
+              <div class="dropdown-opt" role="option" tabindex="0" data-value="ai" data-key="f_o2">Sun‘iy Idrok (AI) Integratsiyasi</div>
+              <div class="dropdown-opt" role="option" tabindex="0" data-value="brand" data-key="f_o3">Backend va API</div>
+              <div class="dropdown-opt" role="option" tabindex="0" data-value="app" data-key="f_o4">Telegram Bot & Mini App</div>
+              <div class="dropdown-opt" role="option" tabindex="0" data-value="ads" data-key="f_o5">Server sozlamalari</div>
+              <div class="dropdown-opt" role="option" tabindex="0" data-value="other" data-key="f_o6">Boshqa xizmatlar</div>
+            </div>
+            <input type="hidden" id="f-service" name="service" value="">
+          </div>
+          <span class="f-err" data-key="f_err_service">Iltimos, xizmat turini tanlang</span>
+        </div>
+        <div class="field">
+          <label for="f-budget" data-key="f_budget">Taxminiy byudjet</label>
+          <input type="text" id="f-budget" name="budget" data-key="f_ph_budget" placeholder="Masalan: $500 - $1,500 yoki kelishiladi" />
+        </div>
+        <div class="field">
+          <label for="f-msg" data-key="f_msg">Loyiha haqida qisqacha</label>
+          <textarea id="f-msg" name="message" rows="4" data-key="f_ph_msg" placeholder="Loyihangiz maqsadi, talablar va muddatlar haqida yozing..."></textarea>
+        </div>
+        <button type="submit" class="form-submit" id="submitBtn">
+          <span data-key="f_submit">Xabar yuborish →</span>
+        </button>
+        <p class="form-note"><i class="fa-regular fa-envelope"></i> <span data-key="f_note">24 soat ichida javob beriladi · Bepul maslahatlashuv</span></p>
+      </form>
+
+    </div>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <span class="toast-icon"><i class="fa-solid fa-circle-check"></i></span>
+    <span class="toast-text" data-key="toast_msg">Xabaringiz muvaffaqiyatli yuborildi! Tez orada javob beraman.</span>
+  </div>
+</section>
+
+<!-- ░░ FOOTER ░░ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-logo">
+      <img src="assets/logo.webp" alt="" width="36" height="36" />
+      <span data-key="footer_brand">MrAstronaut</span>
+    </div>
+    <p class="footer-tag" data-key="footer_tag">Sifatli, xavfsiz va biznesingizga daromad keltiruvchi raqamli mahsulotlar yaratamiz.</p>
+    <div class="footer-links">
+      <a href="#services" data-key="nav_services">Xizmatlar</a>
+      <a href="#why-us" data-key="nav_why">Afzalliklar</a>
+      <a href="#contact" data-key="nav_contact">Aloqa</a>
+    </div>
+    <p class="footer-copy" data-key="footer_copy">&copy; 2026 MrAstronaut. Barcha huquqlar himoyalangan.</p>
+  </div>
+</footer>
+
+<script src="i18n.js?v=6"></script>
+<script src="main.js?v=3"></script>
+</body>
+</html>

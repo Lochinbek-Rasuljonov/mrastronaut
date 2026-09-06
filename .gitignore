@@ -1,0 +1,12 @@
+node_modules/
+.DS_Store
+.env
+__pycache__/
+*.pyc
+.agents/
+ORIGINAL_REQUEST.md
+fix_main.py
+generate_i18n.py
+test_adversarial_suite.py
+test_browser_overflow_and_ui.py
+verify_localization.py
