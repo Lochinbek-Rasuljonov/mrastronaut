@@ -191,14 +191,10 @@ if(form){
     try {
       const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
       const timeoutId = controller ? setTimeout(() => controller.abort(), 15000) : null;
-      const resp = await fetch('https://api.telegram.org/bot***REMOVED***/sendMessage', {
+      const resp = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: '8462509007',
-          text: text,
-          parse_mode: 'HTML'
-        }),
+        body: JSON.stringify({ text: text }),
         signal: controller ? controller.signal : undefined
       });
       if (timeoutId) clearTimeout(timeoutId);
