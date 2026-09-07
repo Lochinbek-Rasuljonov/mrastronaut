@@ -14,7 +14,17 @@ export default async function handler(req, res) {
   // Setup Redis instance
   let redis = null;
   if (REDIS_URL) {
-    redis = new Redis(REDIS_URL);
+    try {
+      const urlObj = new URL(REDIS_URL);
+      redis = new Redis(REDIS_URL, {
+        tls: {
+          servername: urlObj.hostname
+        }
+      });
+      redis.on('error', (err) => console.error('Redis Error:', err));
+    } catch(e) {
+      console.error('Redis connection error:', e);
+    }
   }
 
   const body = req.body;
