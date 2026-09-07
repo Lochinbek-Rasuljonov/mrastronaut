@@ -594,3 +594,65 @@ body.menu-open{overflow:hidden;}
   box-shadow: 0 8px 25px rgba(180, 100, 255, 0.5) !important;
   background: linear-gradient(90deg, #c380ff, #7848ff) !important;
 }
+
+/* --- MOBILE MENU GLASSMORPHISM FIX --- */
+.mobile-menu {
+  background: rgba(25, 25, 25, 0.7) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+.mobile-link {
+  color: rgba(255, 255, 255, 0.6) !important;
+  font-weight: 500 !important;
+}
+
+.mobile-link:hover, .mobile-link:active {
+  color: #fff !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.mobile-link.active {
+  color: #fff !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05) !important;
+}
+
+.mobile-link.active::after {
+  display: none !important;
+}
+
+.mobile-langs .lang-btn {
+  color: rgba(255, 255, 255, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  background: transparent !important;
+}
+
+.mobile-langs .lang-btn.active {
+  color: #fff !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.mobile-cta {
+  background: linear-gradient(90deg, #b464ff, #6432ff) !important;
+  color: #fff !important;
+  border: 1px solid rgba(180, 100, 255, 0.4) !important;
+  box-shadow: 0 4px 15px rgba(180, 100, 255, 0.3) !important;
+}
+
+.mobile-cta:active {
+  background: linear-gradient(90deg, #c380ff, #7848ff) !important;
+}
+
+.burger[aria-expanded="true"] {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.burger[aria-expanded="true"] span {
+  background: #fff !important;
+}
