@@ -12,6 +12,15 @@ export default async function handler(req, res) {
   // Expecting structured data from frontend now
   const { name, contact, service, budget, message } = req.body;
 
+  let formattedContact = contact.trim();
+  // If it does not start with + and does not contain only digits/spaces, it's a username.
+  // Make sure it starts with @
+  if (!/^[\d\+\s\-\(\)]+$/.test(formattedContact)) {
+    if (!formattedContact.startsWith('@')) {
+      formattedContact = '@' + formattedContact;
+    }
+  }
+
   if (!name || !contact) {
     return res.status(400).json({ error: 'Name and contact are required' });
   }
@@ -21,7 +30,7 @@ export default async function handler(req, res) {
 🆕 <b>YANGI BUYURTMA</b>
 
 👤 <b>Ism/Kompaniya:</b> ${name}
-📞 <b>Telegram/Raqam:</b> ${contact}
+📞 <b>Telegram:</b> ${contact}
 💼 <b>Xizmat turi:</b> ${service || 'Tanlanmadi'}
 💰 <b>Byudjet:</b> ${budget || 'Kiritilmadi'}
 
@@ -30,11 +39,11 @@ export default async function handler(req, res) {
   `.trim();
 
   // Clean the contact info to create a direct link if it's a username
-  let cleanContact = contact.trim().replace('@', '');
+  let cleanContact = formattedContact.replace('@', '');
   let contactUrl = `https://t.me/${cleanContact}`;
   
   // If it looks like a phone number (contains + or numbers), don't try to link it directly as a username
-  if (/^[\d\+\s\-\(\)]+$/.test(contact)) {
+  if (/^[\d\+\s\-\(\)]+$/.test(formattedContact)) {
     // Basic phone clean
     let phone = contact.replace(/[^\d+]/g, '');
     contactUrl = `https://t.me/+${phone.replace('+', '')}`;

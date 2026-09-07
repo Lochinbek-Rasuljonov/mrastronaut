@@ -141,7 +141,7 @@ function showToast(isSuccess=true){
 window.showToast = showToast;
 function validate(){
   let ok=true;
-  ['f-name','f-contact','f-service'].forEach(id=>{
+  ['f-name','f-contact','f-service','f-budget','f-msg'].forEach(id=>{
     const inp=document.getElementById(id);
     const field=inp.closest('.field');
     if(!inp.value.trim()){field.classList.add('has-error');ok=false;}
@@ -150,7 +150,7 @@ function validate(){
   return ok;
 }
 if(form){
-  ['f-name','f-contact','f-service'].forEach(id=>{
+  ['f-name','f-contact','f-service','f-budget','f-msg'].forEach(id=>{
     document.getElementById(id)?.addEventListener('input',function(){
       if(this.value.trim())this.closest('.field').classList.remove('has-error');
     });

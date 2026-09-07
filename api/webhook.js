@@ -27,7 +27,7 @@ export default async function handler(req, res) {
   if (data === 'status_accepted') {
     newStatus = '\n\n🟢 <b>HOLAT: QABUL QILINDI</b> (Javob yozish jarayonida)';
   } else if (data === 'status_rejected') {
-    newStatus = '\n\n🔴 <b>HOLAT: BEKOR QILINDI</b>';
+    newStatus = '\n\n🔴 <b>HOLAT: RAD ETILDI</b>';
   }
 
   if (newStatus) {
