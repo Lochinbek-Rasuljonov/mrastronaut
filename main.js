@@ -180,13 +180,6 @@ if(form){
         .replace(/>/g, '&gt;');
     }
 
-    let text = `🚀 <b>Yangi Buyurtma (MrAstronaut)</b>\n\n`;
-    text += `👤 <b>Ism:</b> ${escapeHtml(name)}\n`;
-    text += `📞 <b>Aloqa:</b> ${escapeHtml(contact)}\n`;
-    text += `🛠 <b>Xizmat:</b> ${escapeHtml(service)}\n`;
-    if(budget) text += `💰 <b>Byudjet:</b> ${escapeHtml(budget)}\n`;
-    if(msg) text += `📝 <b>Xabar:</b> ${escapeHtml(msg)}\n`;
-    
     let isOk = false;
     try {
       const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
@@ -194,7 +187,7 @@ if(form){
       const resp = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: text }),
+        body: JSON.stringify({ name, contact, service, budget, message: msg }),
         signal: controller ? controller.signal : undefined
       });
       if (timeoutId) clearTimeout(timeoutId);
