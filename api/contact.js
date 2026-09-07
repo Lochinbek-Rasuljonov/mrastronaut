@@ -27,16 +27,16 @@ export default async function handler(req, res) {
   let aiAnalysis = "<i>AI tahlili mavjud emas.</i>";
   try {
     const aiPrompt = `Siz qobiliyatli IT konsultantsiz. MrAstronaut ismli frilanserga yordam beryapsiz.
-Yangi mijoz quyidagi loyiha so'rovini yubordi:
+Yangi mijoz quyidagi loyiha so‘rovini yubordi:
 - Xizmat turi: ${service || 'Aytilmadi'}
 - Byudjet: ${budget || 'Aytilmadi'}
 - Mijozning xabari: ${message || 'Aytilmadi'}
 
-Iltimos, ushbu mijozni analiz qilib, qisqa 3-4 ta bullet-point (nuqtachalar) bilan quyidagilarni o'zbek tilida yozing:
+Iltimos, ushbu mijozni analiz qilib, qisqa 3-4 ta bullet-point (nuqtachalar) bilan quyidagilarni o‘zbek tilida yozing:
 1. Loyiha uchun qaysi texnologiyalar (Tech Stack) eng mos keladi?
-2. Boshlang'ich narxni qanday aytish va qanday sotish strategiyasini qo'llash kerak?
+2. Boshlang‘ich narxni qanday aytish va qanday sotish strategiyasini qo‘llash kerak?
 3. Mijozning xabaridagi asosiy xavf yoki talab nima?
-Faqat aniq faktlar va maslahat bo'lsin. Hech qanday salomlashishsiz, to'g'ridan to'g'ri tahlilni yozing.`;
+Faqat aniq faktlar va maslahat bo‘lsin. Hech qanday salomlashishsiz, to‘g‘ridan-to‘g‘ri tahlilni yozing. QAT’IY QOIDA: O‘zbek tili imlosiga 100% amal qiling. O‘ va G‘ harflari uchun faqat chapga egilgan apostrof (O‘, o‘, G‘, g‘) ishlating. Tutuq belgisi uchun o‘ngga egilgan apostrof (’) ishlating (masalan, san’at). Matndagi barcha iqtiboslarni standart qo‘shtirnoqlar ("...") ichida bering.`;
 
     const aiResponse = await fetch('https://api.inceptionlabs.ai/v1/chat/completions', {
       method: 'POST',
@@ -74,7 +74,7 @@ Faqat aniq faktlar va maslahat bo'lsin. Hech qanday salomlashishsiz, to'g'ridan 
 💼 <b>Xizmat turi:</b> ${service || 'Tanlanmadi'}
 💰 <b>Byudjet:</b> ${budget || 'Kiritilmadi'}
 
-📝 <b>Qisqacha ma'lumot:</b>
+📝 <b>Qisqacha ma’lumot:</b>
 <i>${message || 'Kiritilmadi'}</i>
 
 🤖 <b>AI Yordamchi Tahlili:</b>

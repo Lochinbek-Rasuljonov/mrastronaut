@@ -136,7 +136,7 @@ export default async function handler(req, res) {
     } 
     else if (text === '📊 Statistika') {
       if (!redis) {
-        replyText = "📊 Hozircha Ma'lumotlar bazasi (DB) ulanmagan. REDIS_URL ni kiritishingiz bilan statistika shu yerda ko'rsatiladi!";
+        replyText = "📊 Hozircha Ma’lumotlar bazasi (DB) ulanmagan. REDIS_URL ni kiritishingiz bilan statistika shu yerda ko‘rsatiladi!";
       } else {
         const accepted = (await redis.get('stats_accepted')) || 0;
         const completed = (await redis.get('stats_completed')) || 0;
@@ -171,7 +171,7 @@ export default async function handler(req, res) {
             model: 'mercury-2',
             reasoning_effort: 'low',
             messages: [
-              { role: 'system', content: "Siz MrAstronautning shaxsiy yordamchisisiz. Qisqa va aniq o'zbek tilida javob bering." },
+              { role: 'system', content: "Siz MrAstronautning shaxsiy yordamchisisiz. Qisqa va aniq o‘zbek tilida javob bering. QAT’IY QOIDA: O‘zbek tili grammatikasi va imlo qoidalariga 100% amal qiling. O‘ va G‘ harflari uchun har doim to‘g‘ri chapga egilgan apostrof belgisini ishlating (O‘, o‘, G‘, g‘). Tutuq belgisini (’) o‘z o‘rnida va to‘g‘ri shaklda qo‘llang. Matndagi barcha iqtibos va nomlarni standart qo‘shtirnoqlar ("...") ichida bering. Har bir gap va so‘z grammatik jihatdan benuqson bo‘lsin." },
               { role: 'user', content: text }
             ]
           })
@@ -184,7 +184,7 @@ export default async function handler(req, res) {
           replyText = "Kechirasiz, AI xizmatida xatolik yuz berdi.";
         }
       } catch (e) {
-        replyText = "AI ga ulanishda muammo bo'ldi.";
+        replyText = "AI ga ulanishda muammo bo‘ldi.";
       }
     }
 
