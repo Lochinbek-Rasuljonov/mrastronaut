@@ -13,7 +13,7 @@ img{display:block;}
 @keyframes reveal{from{opacity:0;transform:translateY(20px) scale(.98);filter:blur(5px);}to{opacity:1;transform:translateY(0) scale(1);filter:blur(0);}}
 @keyframes headlineFade{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
 @keyframes overlayIn{from{opacity:0;}to{opacity:1;}}
-@keyframes menuIn{from{opacity:0;transform:translateY(-10px) scale(.97);}to{opacity:1;transform:translateY(0) scale(1);}}
+@keyframes menuIn{from{opacity:0;transform:translateX(-50%) translateY(-10px) scale(.97);}to{opacity:1;transform:translateX(-50%) translateY(0) scale(1);}}
 @keyframes linkIn{from{opacity:0;transform:translateX(-8px);}to{opacity:1;transform:translateX(0);}}
 @keyframes scrollB{0%,100%{transform:translateX(-50%) translateY(0);opacity:.6;}50%{transform:translateX(-50%) translateY(7px);opacity:1;}}
 @keyframes slotB{0%,100%{opacity:1;}50%{opacity:.3;}}
