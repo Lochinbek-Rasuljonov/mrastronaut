@@ -11,19 +11,24 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Config missing' });
   }
 
-  // Setup Redis instance
-  let redis = null;
-  if (REDIS_URL) {
+  // Lazy Redis connection
+  let _redis = null;
+  async function getRedis() {
+    if (_redis) return _redis;
+    if (!REDIS_URL) return null;
     try {
       const urlObj = new URL(REDIS_URL);
-      redis = new Redis(REDIS_URL, {
-        tls: {
-          servername: urlObj.hostname
-        }
+      _redis = new Redis(REDIS_URL, {
+        tls: { servername: urlObj.hostname },
+        connectTimeout: 5000,
+        commandTimeout: 3000,
+        maxRetriesPerRequest: 1
       });
-      redis.on('error', (err) => console.error('Redis Error:', err));
+      _redis.on('error', (err) => console.error('Redis Error:', err));
+      return _redis;
     } catch(e) {
       console.error('Redis connection error:', e);
+      return null;
     }
   }
 
@@ -42,6 +47,7 @@ export default async function handler(req, res) {
     const data = cb.data;
     let newKeyboard = [];
     let alertText = '';
+    const redis = await getRedis();
 
     if (data === 'status_accepted') {
       alertText = '✅ Loyiha qabul qilindi!';
@@ -49,7 +55,7 @@ export default async function handler(req, res) {
         [ { text: '🟢 HOLAT: QABUL QILINDI (Kutilmoqda)', callback_data: 'ignore' } ],
         [ { text: '🚀 Ishni boshlash', callback_data: 'status_started' }, { text: '❌ Bekor qilish', callback_data: 'status_rejected' } ]
       ];
-      if (redis) await redis.incr('stats_accepted');
+      if (redis) await redis.incr('stats_accepted').catch(()=>null);
     } else if (data === 'status_started') {
       alertText = '🚀 Ish boshlandi!';
       newKeyboard = [
@@ -68,14 +74,13 @@ export default async function handler(req, res) {
         [ { text: '🏆 HOLAT: TUGATILDI VA TO\'LOV OLINDI!', callback_data: 'ignore' } ]
       ];
       if (redis) {
-        await redis.incr('stats_completed');
-        // Extract budget
+        await redis.incr('stats_completed').catch(()=>null);
         const msgText = cb.message.text || '';
         const budgetMatch = msgText.match(/Byudjet:\s*([0-9\.\,]+)/);
         if (budgetMatch && budgetMatch[1]) {
           const amount = parseInt(budgetMatch[1].replace(/[^0-9]/g, ''));
           if (!isNaN(amount) && amount > 0) {
-            await redis.incrby('stats_profit', amount);
+            await redis.incrby('stats_profit', amount).catch(()=>null);
           }
         }
       }
@@ -84,7 +89,7 @@ export default async function handler(req, res) {
       newKeyboard = [
         [ { text: '🔴 HOLAT: RAD ETILDI / BEKOR QILINDI', callback_data: 'ignore' } ]
       ];
-      if (redis) await redis.incr('stats_rejected');
+      if (redis) await redis.incr('stats_rejected').catch(()=>null);
     } else if (data === 'ignore') {
       if (redis) redis.quit();
       return res.status(200).json({ ok: true });
@@ -126,7 +131,6 @@ export default async function handler(req, res) {
   if (body.message) {
     const msg = body.message;
     if (msg.chat.id.toString() !== TELEGRAM_CHAT_ID.toString().trim()) {
-      if (redis) redis.quit();
       return res.status(200).json({ ok: true });
     }
 
@@ -145,20 +149,26 @@ export default async function handler(req, res) {
       };
     } 
     else if (text === '📊 Statistika') {
+      const redis = await getRedis();
       if (!redis) {
-        replyText = "📊 Hozircha Ma’lumotlar bazasi (DB) ulanmagan. REDIS_URL ni kiritishingiz bilan statistika shu yerda ko‘rsatiladi!";
+        replyText = "📊 Hozircha Ma'lumotlar bazasi (DB) ulanmagan. REDIS_URL ni kiritishingiz bilan statistika shu yerda ko'rsatiladi!";
       } else {
-        const accepted = (await redis.get('stats_accepted')) || 0;
-        const completed = (await redis.get('stats_completed')) || 0;
-        const rejected = (await redis.get('stats_rejected')) || 0;
-        const profit = (await redis.get('stats_profit')) || 0;
-        
-        replyText = `📊 <b>Sizning shaxsiy statistikangiz:</b>\n\n` +
-                    `✅ Qabul qilingan loyihalar: <b>${accepted} ta</b>\n` +
-                    `🏆 Muvaffaqiyatli yakunlangan: <b>${completed} ta</b>\n` +
-                    `🔴 Rad etilganlar: <b>${rejected} ta</b>\n\n` +
-                    `💰 Umumiy daromad: <b>$${profit}</b>`;
+        try {
+          const accepted = (await redis.get('stats_accepted')) || 0;
+          const completed = (await redis.get('stats_completed')) || 0;
+          const rejected = (await redis.get('stats_rejected')) || 0;
+          const profit = (await redis.get('stats_profit')) || 0;
+          
+          replyText = `📊 <b>Sizning shaxsiy statistikangiz:</b>\n\n` +
+                      `✅ Qabul qilingan loyihalar: <b>${accepted} ta</b>\n` +
+                      `🏆 Muvaffaqiyatli yakunlangan: <b>${completed} ta</b>\n` +
+                      `🔴 Rad etilganlar: <b>${rejected} ta</b>\n\n` +
+                      `💰 Umumiy daromad: <b>$${profit}</b>`;
+        } catch (err) {
+          replyText = "Bazaga ulanishda xatolik yuz berdi. Iltimos keyinroq urining (Baza uyquda bo'lishi mumkin).";
+        }
       }
+      if (redis) redis.quit();
     }
     else {
       // AI Chat
@@ -181,7 +191,7 @@ export default async function handler(req, res) {
             model: 'mercury-2',
             reasoning_effort: 'low',
             messages: [
-              { role: 'system', content: "Siz MrAstronautning shaxsiy yordamchisisiz. Qisqa va aniq o‘zbek tilida javob bering. QAT’IY QOIDA: O‘zbek tili grammatikasi va imlo qoidalariga 100% amal qiling. O‘ va G‘ harflari uchun har doim to‘g‘ri chapga egilgan apostrof belgisini ishlating (O‘, o‘, G‘, g‘). Tutuq belgisini (’) o‘z o‘rnida va to‘g‘ri shaklda qo‘llang. Matndagi barcha iqtibos va nomlarni standart qo‘shtirnoqlar ("...") ichida bering. Har bir gap va so‘z grammatik jihatdan benuqson bo‘lsin." },
+              { role: 'system', content: "Siz MrAstronautning shaxsiy yordamchisisiz. Qisqa va aniq o‘zbek tilida javob bering. QAT’IY QOIDA: O‘zbek tili grammatikasi va imlo qoidalariga 100% amal qiling. O‘ va G‘ harflari uchun har doim to‘g‘ri chapga egilgan apostrof belgisini ishlating (O‘, o‘, G‘, g‘). Tutuq belgisini (’) o‘z o‘rnida va to‘g‘ri shaklda qo‘llang. Matndagi barcha iqtibos va nomlarni standart qo‘shtirnoqlar (\"...\") ichida bering. Har bir gap va so‘z grammatik jihatdan benuqson bo‘lsin." },
               { role: 'user', content: text }
             ]
           })
@@ -215,10 +225,8 @@ export default async function handler(req, res) {
       });
     }
 
-    if (redis) redis.quit();
     return res.status(200).json({ ok: true });
   }
 
-  if (redis) redis.quit();
   return res.status(200).json({ ok: true });
 }
