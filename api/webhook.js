@@ -1,32 +1,24 @@
+import Redis from 'ioredis';
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, INCEPTION_API_KEY, KV_REST_API_URL, KV_REST_API_TOKEN } = process.env;
+  const { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, INCEPTION_API_KEY, REDIS_URL } = process.env;
 
   if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
     return res.status(500).json({ error: 'Config missing' });
   }
 
+  // Setup Redis instance
+  let redis = null;
+  if (REDIS_URL) {
+    redis = new Redis(REDIS_URL);
+  }
+
   const body = req.body;
   if (!body) return res.status(200).json({ ok: true });
-
-  // Helper to call KV DB
-  async function kvRequest(command, key, value = null) {
-    if (!KV_REST_API_URL || !KV_REST_API_TOKEN) return null;
-    try {
-      const url = `${KV_REST_API_URL}/${command}/${key}${value !== null ? '/' + value : ''}`;
-      const resp = await fetch(url, {
-        headers: { Authorization: `Bearer ${KV_REST_API_TOKEN}` }
-      });
-      const data = await resp.json();
-      return data.result;
-    } catch (e) {
-      console.error('KV Error:', e);
-      return null;
-    }
-  }
 
   // ==========================================
   // 1. HANDLE BUTTON CLICKS (CALLBACK QUERIES)
@@ -47,49 +39,44 @@ export default async function handler(req, res) {
         [ { text: '🟢 HOLAT: QABUL QILINDI (Kutilmoqda)', callback_data: 'ignore' } ],
         [ { text: '🚀 Ishni boshlash', callback_data: 'status_started' }, { text: '❌ Bekor qilish', callback_data: 'status_rejected' } ]
       ];
-      // DB: Increment accepted projects
-      await kvRequest('incr', 'stats_accepted');
-    } 
-    else if (data === 'status_started') {
+      if (redis) await redis.incr('stats_accepted');
+    } else if (data === 'status_started') {
       alertText = '🚀 Ish boshlandi!';
       newKeyboard = [
         [ { text: '🔵 HOLAT: BAJARILMOQDA (Jarayonda)', callback_data: 'ignore' } ],
         [ { text: '🏁 Loyihani topshirish', callback_data: 'status_finished' }, { text: '❌ Bekor qilish', callback_data: 'status_rejected' } ]
       ];
-    } 
-    else if (data === 'status_finished') {
+    } else if (data === 'status_finished') {
       alertText = '🏁 Loyiha tugatildi, to\'lov kutilmoqda!';
       newKeyboard = [
         [ { text: '🟣 HOLAT: YAKUNLANDI (To\'lov kutilmoqda)', callback_data: 'ignore' } ],
         [ { text: '💵 To\'lov qabul qilindi', callback_data: 'status_paid' } ]
       ];
-    } 
-    else if (data === 'status_paid') {
+    } else if (data === 'status_paid') {
       alertText = '🏆 To\'lov olindi. Tabriklaymiz!';
       newKeyboard = [
         [ { text: '🏆 HOLAT: TUGATILDI VA TO\'LOV OLINDI!', callback_data: 'ignore' } ]
       ];
-      // DB: Increment finished projects
-      await kvRequest('incr', 'stats_completed');
-      
-      // Try to extract budget from original message text
-      const msgText = cb.message.text || '';
-      const budgetMatch = msgText.match(/Byudjet:\s*([0-9\.\,]+)/);
-      if (budgetMatch && budgetMatch[1]) {
-        const amount = parseInt(budgetMatch[1].replace(/[^0-9]/g, ''));
-        if (!isNaN(amount) && amount > 0) {
-          await kvRequest('incrby', 'stats_profit', amount);
+      if (redis) {
+        await redis.incr('stats_completed');
+        // Extract budget
+        const msgText = cb.message.text || '';
+        const budgetMatch = msgText.match(/Byudjet:\s*([0-9\.\,]+)/);
+        if (budgetMatch && budgetMatch[1]) {
+          const amount = parseInt(budgetMatch[1].replace(/[^0-9]/g, ''));
+          if (!isNaN(amount) && amount > 0) {
+            await redis.incrby('stats_profit', amount);
+          }
         }
       }
-    } 
-    else if (data === 'status_rejected') {
+    } else if (data === 'status_rejected') {
       alertText = '🔴 Bekor qilindi.';
       newKeyboard = [
         [ { text: '🔴 HOLAT: RAD ETILDI / BEKOR QILINDI', callback_data: 'ignore' } ]
       ];
-      await kvRequest('incr', 'stats_rejected');
-    } 
-    else if (data === 'ignore') {
+      if (redis) await redis.incr('stats_rejected');
+    } else if (data === 'ignore') {
+      if (redis) redis.quit();
       return res.status(200).json({ ok: true });
     }
 
@@ -118,6 +105,8 @@ export default async function handler(req, res) {
         body: JSON.stringify({ callback_query_id: cb.id, text: alertText, show_alert: false })
       });
     } catch (err) { console.error(err); }
+    
+    if (redis) redis.quit();
     return res.status(200).json({ ok: true });
   }
 
@@ -127,6 +116,7 @@ export default async function handler(req, res) {
   if (body.message) {
     const msg = body.message;
     if (msg.chat.id.toString() !== TELEGRAM_CHAT_ID.toString().trim()) {
+      if (redis) redis.quit();
       return res.status(200).json({ ok: true });
     }
 
@@ -145,13 +135,13 @@ export default async function handler(req, res) {
       };
     } 
     else if (text === '📊 Statistika') {
-      if (!KV_REST_API_URL) {
-        replyText = "📊 Hozircha Ma'lumotlar bazasi (KV) ulanmagan. Vercel'da Redis ulashingiz bilan statistika shu yerda ko'rsatiladi!";
+      if (!redis) {
+        replyText = "📊 Hozircha Ma'lumotlar bazasi (DB) ulanmagan. REDIS_URL ni kiritishingiz bilan statistika shu yerda ko'rsatiladi!";
       } else {
-        const accepted = (await kvRequest('get', 'stats_accepted')) || 0;
-        const completed = (await kvRequest('get', 'stats_completed')) || 0;
-        const rejected = (await kvRequest('get', 'stats_rejected')) || 0;
-        const profit = (await kvRequest('get', 'stats_profit')) || 0;
+        const accepted = (await redis.get('stats_accepted')) || 0;
+        const completed = (await redis.get('stats_completed')) || 0;
+        const rejected = (await redis.get('stats_rejected')) || 0;
+        const profit = (await redis.get('stats_profit')) || 0;
         
         replyText = `📊 <b>Sizning shaxsiy statistikangiz:</b>\n\n` +
                     `✅ Qabul qilingan loyihalar: <b>${accepted} ta</b>\n` +
@@ -215,8 +205,10 @@ export default async function handler(req, res) {
       });
     }
 
+    if (redis) redis.quit();
     return res.status(200).json({ ok: true });
   }
 
+  if (redis) redis.quit();
   return res.status(200).json({ ok: true });
 }
