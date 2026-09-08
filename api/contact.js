@@ -1,3 +1,30 @@
+export function normalizeUzbekOrthography(text) {
+  if (!text) return text;
+  // 1. Convert paired quotation marks: "..." and «...» to standard “...” (U+201C / U+201D)
+  let res = text.replace(/«([^«»\r\n]+)»/g, '“$1”');
+  res = res.replace(/"([^"\r\n]+)"/g, '“$1”');
+
+  // 2. O‘, o‘, G‘, g‘ with left curly apostrophe ‘ (U+2018)
+  // Followed by letters (o‘z, g‘oya) or word boundary/whitespace/punctuation (tog‘, bog‘)
+  res = res.replace(/([OoGg])['`’ʻʼ´](?=[a-zA-Z\u0400-\u04FF]|\s|[.,!?;:)]|$)/g, (m, p1) => p1 + '‘');
+
+  // 3. Tutuq belgisi with right curly apostrophe ’ (U+2019)
+  // Between letters (except O/G handled above): ma’lumot, san’at, mas’ul, ta’minlash, etc.
+  res = res.replace(/([a-zA-Z\u0400-\u04FF])['`‘ʻʼ´]([a-zA-Z\u0400-\u04FF])/g, (m, p1, p2) => {
+    if (/^[og]$/i.test(p1)) return p1 + '‘' + p2;
+    return p1 + '’' + p2;
+  });
+
+  return res;
+}
+
+export function escapeHtml(str) {
+  return (str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -32,11 +59,11 @@ Yangi mijoz quyidagi loyiha so‘rovini yubordi:
 - Byudjet: ${budget || 'Aytilmadi'}
 - Mijozning xabari: ${message || 'Aytilmadi'}
 
-Iltimos, ushbu mijozni analiz qilib, qisqa 3-4 ta bullet-point (nuqtachalar) bilan quyidagilarni o‘zbek tilida yozing:
+Iltimos, ushbu mijoz so‘rovini tahlil qilib, qisqa 3–4 ta band (nuqtachalar) bilan quyidagilarni o‘zbek tilida yozing:
 1. Loyiha uchun qaysi texnologiyalar (Tech Stack) eng mos keladi?
 2. Boshlang‘ich narxni qanday aytish va qanday sotish strategiyasini qo‘llash kerak?
 3. Mijozning xabaridagi asosiy xavf yoki talab nima?
-Faqat aniq faktlar va maslahat bo‘lsin. Hech qanday salomlashishsiz, to‘g‘ridan-to‘g‘ri tahlilni yozing. QAT’IY QOIDA: O‘zbek tili imlosiga 100% amal qiling. O‘ va G‘ harflari uchun faqat chapga egilgan apostrof (O‘, o‘, G‘, g‘) ishlating. Tutuq belgisi uchun o‘ngga egilgan apostrof (’) ishlating (masalan, san’at). Matndagi barcha iqtiboslarni standart qo‘shtirnoqlar ("...") ichida bering.`;
+Faqat aniq faktlar va maslahat bo‘lsin. Hech qanday salomlashishsiz, to‘g‘ridan-to‘g‘ri tahlilni yozing. QAT’IY QOIDA: O‘zbek tili grammatikasi va imlo qoidalariga 100% amal qiling. O‘ va G‘ harflarida har doim to‘g‘ri chapga egilgan apostrof belgisini ishlating (O‘, o‘, G‘, g‘). Ularni oddiy to‘g‘ri tutuq belgisi yoki birikmali tirnoqlar bilan almashtirmang. Tutuq belgisini (’) o‘z o‘rnida va to‘g‘ri shaklda qo‘llang. Matndagi barcha iqtibos va nomlarni standart qo‘shtirnoqlar (“...”) ichida bering. Har bir gap va so‘z grammatik jihatdan benuqson bo‘lsin.`;
 
     const aiResponse = await fetch('https://api.inceptionlabs.ai/v1/chat/completions', {
       method: 'POST',
@@ -54,9 +81,9 @@ Faqat aniq faktlar va maslahat bo‘lsin. Hech qanday salomlashishsiz, to‘g‘
     if (aiResponse.ok) {
       const aiData = await aiResponse.json();
       if (aiData.choices && aiData.choices[0] && aiData.choices[0].message) {
-        aiAnalysis = aiData.choices[0].message.content;
-        // Escape HTML for Telegram
-        aiAnalysis = aiAnalysis.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        let rawContent = aiData.choices[0].message.content || '';
+        rawContent = normalizeUzbekOrthography(rawContent);
+        aiAnalysis = escapeHtml(rawContent);
       }
     } else {
       console.error('AI API failed', await aiResponse.text());
@@ -65,17 +92,24 @@ Faqat aniq faktlar va maslahat bo‘lsin. Hech qanday salomlashishsiz, to‘g‘
     console.error('AI call failed', err);
   }
 
+
   // --- BUILD TELEGRAM MESSAGE ---
+  const safeName = normalizeUzbekOrthography(escapeHtml(name));
+  const safeContact = escapeHtml(formattedContact);
+  const safeService = normalizeUzbekOrthography(escapeHtml(service || 'Tanlanmadi'));
+  const safeBudget = normalizeUzbekOrthography(escapeHtml(budget || 'Kiritilmadi'));
+  const safeMessage = normalizeUzbekOrthography(escapeHtml(message || 'Kiritilmadi'));
+
   const text = `
 🆕 <b>YANGI BUYURTMA</b>
 
-👤 <b>Ism/Kompaniya:</b> ${name}
-📞 <b>Telegram:</b> ${formattedContact}
-💼 <b>Xizmat turi:</b> ${service || 'Tanlanmadi'}
-💰 <b>Byudjet:</b> ${budget || 'Kiritilmadi'}
+👤 <b>Ism/Kompaniya:</b> ${safeName}
+📞 <b>Telegram:</b> ${safeContact}
+💼 <b>Xizmat turi:</b> ${safeService}
+💰 <b>Byudjet:</b> ${safeBudget}
 
 📝 <b>Qisqacha ma’lumot:</b>
-<i>${message || 'Kiritilmadi'}</i>
+<i>${safeMessage}</i>
 
 🤖 <b>AI Yordamchi Tahlili:</b>
 ${aiAnalysis}

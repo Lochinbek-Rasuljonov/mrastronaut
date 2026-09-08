@@ -1,5 +1,32 @@
 import Redis from 'ioredis';
 
+export function normalizeUzbekOrthography(text) {
+  if (!text) return text;
+  // 1. Convert paired quotation marks: "..." and «...» to standard “...” (U+201C / U+201D)
+  let res = text.replace(/«([^«»\r\n]+)»/g, '“$1”');
+  res = res.replace(/"([^"\r\n]+)"/g, '“$1”');
+
+  // 2. O‘, o‘, G‘, g‘ with left curly apostrophe ‘ (U+2018)
+  // Followed by letters (o‘z, g‘oya) or word boundary/whitespace/punctuation (tog‘, bog‘)
+  res = res.replace(/([OoGg])['`’ʻʼ´](?=[a-zA-Z\u0400-\u04FF]|\s|[.,!?;:)]|$)/g, (m, p1) => p1 + '‘');
+
+  // 3. Tutuq belgisi with right curly apostrophe ’ (U+2019)
+  // Between letters (except O/G handled above): ma’lumot, san’at, mas’ul, ta’minlash, etc.
+  res = res.replace(/([a-zA-Z\u0400-\u04FF])['`‘ʻʼ´]([a-zA-Z\u0400-\u04FF])/g, (m, p1, p2) => {
+    if (/^[og]$/i.test(p1)) return p1 + '‘' + p2;
+    return p1 + '’' + p2;
+  });
+
+  return res;
+}
+
+export function escapeHtml(str) {
+  return (str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -139,7 +166,7 @@ export default async function handler(req, res) {
     let replyMarkup = null;
 
     if (text === '/start') {
-      replyText = `Salom janob MrAstronaut! 👨‍🚀\n\nBiz sizning shaxsiy AI yordamchingiz va CRM boshqaruv markazingizmiz. Nima xizmat?`;
+      replyText = `Salom, janob MrAstronaut! 👨‍🚀\n\nBiz sizning shaxsiy AI yordamchingiz va CRM boshqaruv markazingiz bo‘lamiz. Nima xizmat?`;
       replyMarkup = {
         keyboard: [
           [{ text: "📊 Statistika" }, { text: "💬 AI bilan suhbat" }]
@@ -165,7 +192,7 @@ export default async function handler(req, res) {
                       `🔴 Rad etilganlar: <b>${rejected} ta</b>\n\n` +
                       `💰 Umumiy sof foyda: <b>$${profit}</b>`;
         } catch (err) {
-          replyText = "Bazaga ulanishda xatolik yuz berdi. Iltimos keyinroq urining (Baza uyquda bo‘lishi mumkin).";
+          replyText = "Bazaga ulanishda xatolik yuz berdi. Iltimos, keyinroq urining (baza uyquda bo‘lishi mumkin).";
         }
       }
       if (redis) redis.quit();
@@ -191,7 +218,7 @@ export default async function handler(req, res) {
             model: 'mercury-2',
             reasoning_effort: 'low',
             messages: [
-              { role: 'system', content: "Siz MrAstronautning shaxsiy yordamchisisiz. Qisqa va aniq o‘zbek tilida javob bering. QAT’IY QOIDA: O‘zbek tili grammatikasi va imlo qoidalariga 100% amal qiling. O‘ va G‘ harflari uchun har doim to‘g‘ri chapga egilgan apostrof belgisini ishlating (O‘, o‘, G‘, g‘). Tutuq belgisini (’) o‘z o‘rnida va to‘g‘ri shaklda qo‘llang. Matndagi barcha iqtibos va nomlarni standart qo‘shtirnoqlar (\"...\") ichida bering. Har bir gap va so‘z grammatik jihatdan benuqson bo‘lsin." },
+              { role: 'system', content: "Siz MrAstronautning shaxsiy yordamchisisiz. Qisqa va aniq o‘zbek tilida javob bering. QAT’IY QOIDA: O‘zbek tili grammatikasi va imlo qoidalariga 100% amal qiling. O‘ va G‘ harflarida har doim to‘g‘ri chapga egilgan apostrof belgisini ishlating (O‘, o‘, G‘, g‘). Ularni oddiy to‘g‘ri tutuq belgisi yoki birikmali tirnoqlar bilan almashtirmang. Tutuq belgisini (’) o‘z o‘rnida va to‘g‘ri shaklda qo‘llang. Matndagi barcha iqtibos va nomlarni standart qo‘shtirnoqlar (“...”) ichida bering. Har bir gap va so‘z grammatik jihatdan benuqson bo‘lsin." },
               { role: 'user', content: text }
             ]
           })
@@ -199,12 +226,13 @@ export default async function handler(req, res) {
 
         if (aiResponse.ok) {
           const aiData = await aiResponse.json();
-          replyText = aiData.choices[0].message.content;
+          let rawAiText = aiData.choices[0].message.content || '';
+          replyText = escapeHtml(normalizeUzbekOrthography(rawAiText));
         } else {
           replyText = "Kechirasiz, AI xizmatida xatolik yuz berdi.";
         }
       } catch (e) {
-        replyText = "AI ga ulanishda muammo bo‘ldi.";
+        replyText = "AIga ulanishda muammo yuz berdi.";
       }
     }
 
