@@ -1,11 +1,8 @@
 'use strict';
 (function(){
 
-/* ── HEADER SCROLL ─────────────────────────────────────── */
+/* ── HEADER (STATIC UNIFIED BACKGROUND) ───────────────── */
 const header=document.getElementById('header');
-window.addEventListener('scroll',()=>{
-  header.style.background=window.scrollY>40?'rgba(0,0,0,.92)':'rgba(0,0,0,.75)';
-},{ passive:true });
 
 /* ── ACTIVE NAV LINK (MAGNETIC SPRING PILL) ─────────────── */
 const sections=document.querySelectorAll('section[id],main[id]');
