@@ -25,28 +25,49 @@ function moveIndicatorTo(targetLink){
 function updateActiveNav(){
   if(isHoveringNav)return;
   const active=document.querySelector('.nav-link.active')||navLinks[0];
-  moveIndicatorTo(active);
+  if(active){
+    moveIndicatorTo(active);
+  }
 }
 
 window.addEventListener('resize',updateActiveNav);
+
+const sectionNavMap = {
+  'hero': '#hero',
+  'services': '#services',
+  'process': '#services',
+  'why-us': '#why-us',
+  'urgency': '#why-us',
+  'faq': '#why-us',
+  'contact': '#contact'
+};
+
+function setActiveNav(targetHref){
+  if(!targetHref)return;
+  const rawId = targetHref.replace(/^#/, '');
+  const mappedHref = sectionNavMap[rawId] || (document.querySelector(`.nav-link[href="#${rawId}"]`) ? `#${rawId}` : null);
+  if(!mappedHref) return; // Retain current active link if target does not map to a nav item
+
+  const targetLink = document.querySelector(`.nav-link[href="${mappedHref}"]`);
+  if(!targetLink) return;
+
+  navLinks.forEach(a=>{
+    a.classList.toggle('active', a === targetLink);
+  });
+  const mobileNavLinks=document.querySelectorAll('.mobile-link');
+  mobileNavLinks.forEach(a=>{
+    a.classList.toggle('active', a.getAttribute('href') === mappedHref);
+  });
+  if(!isHoveringNav){
+    requestAnimationFrame(updateActiveNav);
+  }
+}
 
 if(navPill){
   navLinks.forEach(link=>{
     link.addEventListener('mouseenter',()=>{
       isHoveringNav=true;
       moveIndicatorTo(link);
-    });
-
-    link.addEventListener('click',e=>{
-      navLinks.forEach(a=>a.classList.remove('active'));
-      link.classList.add('active');
-      moveIndicatorTo(link);
-      const targetId=link.getAttribute('href');
-      const targetEl=document.querySelector(targetId);
-      if(targetEl){
-        e.preventDefault();
-        targetEl.scrollIntoView({behavior:'smooth'});
-      }
     });
   });
 
@@ -56,30 +77,63 @@ if(navPill){
   });
 }
 
-const io=new IntersectionObserver(entries=>{
-  entries.forEach(e=>{
-    if(e.isIntersecting){
-      const id=e.target.id;
-      navLinks.forEach(a=>{
-        const href=a.getAttribute('href');
-        a.classList.toggle('active',href==='#'+id||(id==='hero'&&href==='#hero'));
-      });
-      if(!isHoveringNav){
-        requestAnimationFrame(updateActiveNav);
+function onScrollSpy(){
+  if(isHoveringNav)return;
+  const totalH=document.documentElement.scrollHeight;
+  const y=window.scrollY;
+  let targetHref='#hero';
+  if(y<60){
+    targetHref='#hero';
+  }else if(y+window.innerHeight>=totalH-50){
+    targetHref='#contact';
+  }else{
+    const scrollPos=y+140;
+    for(const s of sections){
+      const top=s.offsetTop;
+      const bot=top+s.offsetHeight;
+      if(scrollPos>=top&&scrollPos<bot){
+        targetHref=sectionNavMap[s.id]||('#'+s.id);
+        break;
       }
     }
-  });
-},{threshold:.3});
-sections.forEach(s=>io.observe(s));
-// Initialize on load
-setTimeout(updateActiveNav,60);
-window.addEventListener('load',updateActiveNav);
+  }
+  setActiveNav(targetHref);
+}
 
-/* ── SMOOTH SCROLL ─────────────────────────────────────── */
+let scrollTicking=false;
+window.addEventListener('scroll',()=>{
+  if(!scrollTicking){
+    scrollTicking=true;
+    requestAnimationFrame(()=>{
+      onScrollSpy();
+      scrollTicking=false;
+    });
+  }
+},{passive:true});
+
+// Initialize on load
+setTimeout(()=>{
+  onScrollSpy();
+  updateActiveNav();
+},60);
+window.addEventListener('load',()=>{
+  onScrollSpy();
+  updateActiveNav();
+});
+
+/* ── SMOOTH SCROLL & ANCHOR NAVIGATION ─────────────────── */
 document.querySelectorAll('a[href^="#"]').forEach(a=>{
   a.addEventListener('click',e=>{
-    const t=document.querySelector(a.getAttribute('href'));
-    if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth'});}
+    const href=a.getAttribute('href');
+    if(!href||href==='#')return;
+    const targetEl=document.querySelector(href);
+    if(targetEl){
+      e.preventDefault();
+      const rawId=href.replace(/^#/, '');
+      const mapped=sectionNavMap[rawId]||href;
+      setActiveNav(mapped);
+      targetEl.scrollIntoView({behavior:'smooth'});
+    }
   });
 });
 
@@ -175,7 +229,7 @@ function showToast(isSuccess=true){
     if(iconEl)iconEl.innerHTML='<i class="fa-solid fa-circle-check"></i>';
     if(textEl){
       textEl.dataset.key='toast_msg';
-      textEl.textContent=curT['toast_msg']||(typeof T!=='undefined'&&T.uz&&T.uz['toast_msg'])||'Xabaringiz muvaffaqiyatli yuborildi! Tez orada javob beraman.';
+      textEl.textContent=curT['toast_msg']||(typeof T!=='undefined'&&T.uz&&T.uz['toast_msg'])||'Xabaringiz muvaffaqiyatli yuborildi! Tez orada bog‘lanamiz.';
     }
   }else{
     toast.classList.add('is-error');
