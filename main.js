@@ -10,6 +10,17 @@ window.addEventListener('scroll',()=>{
 /* ── ACTIVE NAV LINK ───────────────────────────────────── */
 const sections=document.querySelectorAll('section[id],main[id]');
 const navLinks=document.querySelectorAll('.nav-link');
+
+function updateNavIndicator() {
+  const active = document.querySelector('.nav-link.active');
+  const indicator = document.querySelector('.nav-indicator');
+  if (active && indicator) {
+    indicator.style.width = active.offsetWidth + 'px';
+    indicator.style.transform = `translateX(${active.offsetLeft}px)`;
+  }
+}
+window.addEventListener('resize', updateNavIndicator);
+
 const io=new IntersectionObserver(entries=>{
   entries.forEach(e=>{
     if(e.isIntersecting){
@@ -18,10 +29,14 @@ const io=new IntersectionObserver(entries=>{
         const href=a.getAttribute('href');
         a.classList.toggle('active',href==='#'+id||(id==='hero'&&href==='#hero'));
       });
+      requestAnimationFrame(updateNavIndicator);
     }
   });
 },{threshold:.3});
 sections.forEach(s=>io.observe(s));
+// Initialize on load
+setTimeout(updateNavIndicator, 100);
+window.addEventListener('load', updateNavIndicator);
 
 /* ── SMOOTH SCROLL ─────────────────────────────────────── */
 document.querySelectorAll('a[href^="#"]').forEach(a=>{
