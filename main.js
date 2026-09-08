@@ -611,11 +611,11 @@ function initThreeJsAnimation(messageText) {
   const subText = curT['toast_success_sub'] || 'Buyurtma qabul qilindi';
 
   textContainer.innerHTML = `
-    <div style="font-size: clamp(28px, 5vw, 42px); font-weight: 700; letter-spacing: 3px; text-transform: uppercase; background: linear-gradient(135deg, #fff 0%, #4ade80 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0px 10px 30px rgba(74,222,128,0.2);">
+    <div style="font-size: clamp(28px, 5vw, 42px); font-weight: 700; letter-spacing: 3px; text-transform: uppercase; background: linear-gradient(135deg, #fff 0%, #eab308 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0px 10px 30px rgba(74,222,128,0.2);">
       ${messageText}
     </div>
     <div style="margin-top: 15px; font-size: clamp(14px, 2vw, 16px); color: #a0a0a0; letter-spacing: 2px; font-weight: 300; display: flex; align-items: center; justify-content: center; gap: 10px;">
-      <span style="display:inline-block; width: 6px; height: 6px; background: #4ade80; border-radius: 50%; box-shadow: 0 0 12px 2px #4ade80; animation: pulse3d 2s infinite;"></span>
+      <span style="display:inline-block; width: 6px; height: 6px; background: #eab308; border-radius: 50%; box-shadow: 0 0 12px 2px #eab308; animation: pulse3d 2s infinite;"></span>
       <span>${subText}</span>
     </div>
     <style>@keyframes pulse3d { 0% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.5); } 100% { opacity: 0.5; transform: scale(1); } }</style>
@@ -644,41 +644,35 @@ function initThreeJsAnimation(messageText) {
   pointLight.position.set(0, 0, 10);
   scene.add(pointLight);
 
-  // 3D CHECKMARK
+  // 3D NEON BANANA
   const checkGroup = new THREE.Group();
   
-  const shape = new THREE.Shape();
-  shape.moveTo(-2, 0);
-  shape.lineTo(-0.5, -1.5);
-  shape.lineTo(3, 2);
-  shape.lineTo(2.2, 2.7);
-  shape.lineTo(-0.5, 0);
-  shape.lineTo(-1.3, 0.8);
-  shape.lineTo(-2, 0);
+  const textureLoader = new THREE.TextureLoader();
+  const bananaTex = textureLoader.load('assets/banana.jpg');
   
-  const extrudeSettings = { depth: 1, bevelEnabled: true, bevelSegments: 3, steps: 2, bevelSize: 0.2, bevelThickness: 0.2 };
-  const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-  geometry.center();
-  
-  const material = new THREE.MeshStandardMaterial({ 
-    color: 0x4ade80, emissive: 0x22c55e, emissiveIntensity: 0.5,
-    metalness: 0.8, roughness: 0.2, wireframe: false
+  const geometry = new THREE.PlaneGeometry(16, 16);
+  const material = new THREE.MeshBasicMaterial({
+    map: bananaTex,
+    blending: THREE.AdditiveBlending,
+    transparent: true,
+    depthWrite: false
   });
+  
   const checkMesh = new THREE.Mesh(geometry, material);
   checkMesh.scale.set(0.01, 0.01, 0.01);
   checkGroup.add(checkMesh);
-
-  // Glowing rings around checkmark
-  const ringGeo1 = new THREE.TorusGeometry(8, 0.1, 16, 100);
-  const ringMat1 = new THREE.MeshBasicMaterial({ color: 0x4ade80, transparent: true, opacity: 0.5 });
+  
+  // Glowing rings around banana
+  const ringGeo1 = new THREE.TorusGeometry(10, 0.1, 16, 100);
+  const ringMat1 = new THREE.MeshBasicMaterial({ color: 0xeab308, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending });
   const ring1 = new THREE.Mesh(ringGeo1, ringMat1);
   checkGroup.add(ring1);
   
-  const ringGeo2 = new THREE.TorusGeometry(10, 0.05, 16, 100);
+  const ringGeo2 = new THREE.TorusGeometry(12, 0.05, 16, 100);
   const ring2 = new THREE.Mesh(ringGeo2, ringMat1);
   ring2.rotation.x = Math.PI / 2;
   checkGroup.add(ring2);
-
+  
   scene.add(checkGroup);
 
   // STARS / PARTICLES
@@ -794,6 +788,7 @@ function initThreeJsAnimation(messageText) {
     renderer.dispose();
     geometry.dispose();
     material.dispose();
+    if (bananaTex) bananaTex.dispose();
     ringGeo1.dispose();
     ringGeo2.dispose();
     ringMat1.dispose();
