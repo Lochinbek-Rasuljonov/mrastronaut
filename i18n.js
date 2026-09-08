@@ -26,6 +26,7 @@ const T = {
     "stat3": "Yillik tajriba",
     "stat4_val": "24h",
     "stat4": "Javob berish vaqti",
+    "stat4_val_suffix": " s",
     "sec_services_tag": "// XIZMATLAR",
     "sec_services_title": "Biz nimalar quramiz?",
     "sec_services_sub": "Har bir xizmat professional darajada bajariladi — biznesingiz ajralib turishi va doimiy daromad keltirishi uchun.",
@@ -174,6 +175,7 @@ const T = {
     "stat3": "Йиллик тажриба",
     "stat4_val": "24h",
     "stat4": "Жавоб бериш вақти",
+    "stat4_val_suffix": " с",
     "sec_services_tag": "// ХИЗМАТЛАР",
     "sec_services_title": "Биз нималар қурамиз?",
     "sec_services_sub": "Ҳар бир хизмат профессионал даражада бажарилади — бизнесингиз ажралиб туриши ва доимий даромад келтириши учун.",
@@ -322,6 +324,7 @@ const T = {
     "stat3": "Лет опыта",
     "stat4_val": "24h",
     "stat4": "Время ответа",
+    "stat4_val_suffix": " ч",
     "sec_services_tag": "// УСЛУГИ",
     "sec_services_title": "Что мы создаем",
     "sec_services_sub": "Каждое решение создается профессионально — чтобы ваш бизнес выделялся среди конкурентов и генерировал прибыль.",
@@ -469,6 +472,7 @@ const T = {
     "stat3": "Years Experience",
     "stat4_val": "24h",
     "stat4": "Response Time",
+    "stat4_val_suffix": "h",
     "sec_services_tag": "// SERVICES",
     "sec_services_title": "What We Build",
     "sec_services_sub": "Every solution is engineered to make your brand stand out, captivate audiences, and drive measurable revenue.",
@@ -623,6 +627,15 @@ function applyLang(l) {
         el.setAttribute('content', t[k]);
       } else {
         el.textContent = t[k];
+      }
+    }
+    // Handle data-suffix translations dynamically
+    if (el.hasAttribute('data-suffix') && t[k + '_suffix'] !== undefined) {
+      el.dataset.suffix = t[k + '_suffix'];
+      // Re-apply static text in case animation already finished or hasn't started
+      if (!el.tagName.match(/INPUT|TEXTAREA|META/)) {
+        const target = el.dataset.target || '';
+        el.textContent = target + t[k + '_suffix'];
       }
     }
   });
