@@ -7,19 +7,54 @@ window.addEventListener('scroll',()=>{
   header.style.background=window.scrollY>40?'rgba(0,0,0,.92)':'rgba(0,0,0,.75)';
 },{ passive:true });
 
-/* ── ACTIVE NAV LINK ───────────────────────────────────── */
+/* ── ACTIVE NAV LINK (MAGNETIC SPRING PILL) ─────────────── */
 const sections=document.querySelectorAll('section[id],main[id]');
 const navLinks=document.querySelectorAll('.nav-link');
+const navPill=document.querySelector('.nav-pill');
+const indicator=document.querySelector('.nav-indicator');
 
-function updateNavIndicator() {
-  const active = document.querySelector('.nav-link.active');
-  const indicator = document.querySelector('.nav-indicator');
-  if (active && indicator) {
-    indicator.style.width = active.offsetWidth + 'px';
-    indicator.style.transform = `translateX(${active.offsetLeft}px)`;
-  }
+let isHoveringNav=false;
+
+function moveIndicatorTo(targetLink){
+  if(!indicator||!targetLink)return;
+  indicator.style.width=targetLink.offsetWidth+'px';
+  indicator.style.transform=`translateX(${targetLink.offsetLeft}px)`;
+  indicator.style.opacity='1';
 }
-window.addEventListener('resize', updateNavIndicator);
+
+function updateActiveNav(){
+  if(isHoveringNav)return;
+  const active=document.querySelector('.nav-link.active')||navLinks[0];
+  moveIndicatorTo(active);
+}
+
+window.addEventListener('resize',updateActiveNav);
+
+if(navPill){
+  navLinks.forEach(link=>{
+    link.addEventListener('mouseenter',()=>{
+      isHoveringNav=true;
+      moveIndicatorTo(link);
+    });
+
+    link.addEventListener('click',e=>{
+      navLinks.forEach(a=>a.classList.remove('active'));
+      link.classList.add('active');
+      moveIndicatorTo(link);
+      const targetId=link.getAttribute('href');
+      const targetEl=document.querySelector(targetId);
+      if(targetEl){
+        e.preventDefault();
+        targetEl.scrollIntoView({behavior:'smooth'});
+      }
+    });
+  });
+
+  navPill.addEventListener('mouseleave',()=>{
+    isHoveringNav=false;
+    updateActiveNav();
+  });
+}
 
 const io=new IntersectionObserver(entries=>{
   entries.forEach(e=>{
@@ -29,14 +64,16 @@ const io=new IntersectionObserver(entries=>{
         const href=a.getAttribute('href');
         a.classList.toggle('active',href==='#'+id||(id==='hero'&&href==='#hero'));
       });
-      requestAnimationFrame(updateNavIndicator);
+      if(!isHoveringNav){
+        requestAnimationFrame(updateActiveNav);
+      }
     }
   });
 },{threshold:.3});
 sections.forEach(s=>io.observe(s));
 // Initialize on load
-setTimeout(updateNavIndicator, 100);
-window.addEventListener('load', updateNavIndicator);
+setTimeout(updateActiveNav,60);
+window.addEventListener('load',updateActiveNav);
 
 /* ── SMOOTH SCROLL ─────────────────────────────────────── */
 document.querySelectorAll('a[href^="#"]').forEach(a=>{
