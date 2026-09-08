@@ -26,7 +26,7 @@ img{display:block;}
 /* HEADER */
 .header{position:fixed;top:0;left:0;right:0;z-index:100;padding:clamp(10px,1.8vh,18px) clamp(14px,3vw,32px);background:rgba(5,5,8,.94);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(--border);animation:slideDown .7s cubic-bezier(.22,1,.36,1) both;}
 .header-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:clamp(10px,1.8vw,22px);}
-.logo{display:flex;align-items:center;justify-content:center;width:clamp(38px,4vw,44px);height:clamp(38px,4vw,44px);background:transparent;flex-shrink:0;transition:transform var(--tr),filter var(--tr);}
+.logo{display:flex;align-items:center;justify-content:center;width:clamp(44px,4.8vw,52px);height:clamp(44px,4.8vw,52px);background:transparent;flex-shrink:0;transition:transform var(--tr),filter var(--tr);}
 .logo:hover{transform:scale(1.08);filter:drop-shadow(0 0 12px rgba(180,100,255,.5));}
 .logo img{width:100%;height:100%;object-fit:contain;}
 .nav-pill{display:flex;align-items:center;background:rgba(255,255,255,.04);height:clamp(40px,4.8vw,46px);max-width:400px;flex:1;padding:3px 6px;border-radius:999px;box-shadow:var(--shadow);}
