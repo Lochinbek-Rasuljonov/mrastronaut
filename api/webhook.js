@@ -35,7 +35,7 @@ export default async function handler(req, res) {
   const INCEPTION_API_KEY = (process.env.INCEPTION_API_KEY || '***REMOVED***').trim();
 
   if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
-    return res.status(500).json({ error: 'Config missing' });
+    console.error('Missing config'); return res.status(500).json({ error: 'Server error' });
   }
 
   const body = req.body;

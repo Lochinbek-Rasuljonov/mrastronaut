@@ -35,7 +35,7 @@ export default async function handler(req, res) {
   const INCEPTION_API_KEY = (process.env.INCEPTION_API_KEY || '***REMOVED***').trim();
 
   if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
-    return res.status(500).json({ error: 'Server sozlamalari mavjud emas: TELEGRAM_BOT_TOKEN yoki TELEGRAM_CHAT_ID sozlanmagan.' });
+    console.error('Missing config'); return res.status(500).json({ error: 'Serverda vaqtinchalik nosozlik yuz berdi. Iltimos, birozdan soʻng qayta urinib koʻring.' });
   }
 
   const { name, contact, service, budget, message } = req.body || {};
@@ -185,15 +185,8 @@ ${aiAnalysis}
     if (data && data.ok) {
       return res.status(200).json({ success: true });
     } else {
-      let desc = data?.description || 'Telegram API xatosi';
-      if (desc.includes('Unauthorized')) {
-        desc = 'Telegram bot tokeni notoʻgʻri yoki bekor qilingan (Unauthorized).';
-      } else if (desc.includes('chat not found')) {
-        desc = 'Telegram chat topilmadi (Botga avval /start yuborilgan boʻlishi kerak).';
-      } else if (desc.includes('bot was blocked')) {
-        desc = 'Telegram bot bloklangan. Iltimos, botni blokdan chiqaring.';
-      }
-      return res.status(502).json({ error: desc });
+      console.error('Telegram API error:', data);
+      return res.status(502).json({ error: 'Xizmat vaqtincha faol emas. Iltimos, keyinroq urinib koʻring.' });
     }
   } catch (error) {
     return res.status(500).json({ error: 'Xabarni yuborishda xatolik yuz berdi' });
