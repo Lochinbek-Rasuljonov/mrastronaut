@@ -585,17 +585,24 @@ body.menu-open{overflow:hidden;}
 }
 
 .sign-in {
-  background: linear-gradient(90deg, #b464ff, #6432ff) !important;
-  color: #fff !important;
+  background: #ffffff !important;
+  color: #000000 !important;
   font-weight: 600 !important;
-  border: 1px solid rgba(180, 100, 255, 0.4) !important;
-  box-shadow: 0 4px 15px rgba(180, 100, 255, 0.3) !important;
+  letter-spacing: -0.01em !important;
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+  transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.2s ease !important;
 }
 
 .sign-in:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 8px 25px rgba(180, 100, 255, 0.5) !important;
-  background: linear-gradient(90deg, #c380ff, #7848ff) !important;
+  transform: translateY(-2px) scale(1.02) !important;
+  background: #f4f4f5 !important;
+  color: #000000 !important;
+  box-shadow: 0 0 28px rgba(255, 255, 255, 0.45), 0 4px 16px rgba(0, 0, 0, 0.5) !important;
+}
+
+.sign-in:active {
+  transform: translateY(0) scale(0.98) !important;
 }
 
 /* --- MOBILE MENU GLASSMORPHISM FIX --- */
@@ -640,14 +647,19 @@ body.menu-open{overflow:hidden;}
 }
 
 .mobile-cta {
-  background: linear-gradient(90deg, #b464ff, #6432ff) !important;
-  color: #fff !important;
-  border: 1px solid rgba(180, 100, 255, 0.4) !important;
-  box-shadow: 0 4px 15px rgba(180, 100, 255, 0.3) !important;
+  background: #ffffff !important;
+  color: #000000 !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.2), 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+  transition: transform 0.2s ease, background 0.2s ease !important;
 }
 
 .mobile-cta:active {
-  background: linear-gradient(90deg, #c380ff, #7848ff) !important;
+  background: #f4f4f5 !important;
+  color: #000000 !important;
+  transform: scale(0.98) !important;
 }
 
 .burger[aria-expanded="true"] {
