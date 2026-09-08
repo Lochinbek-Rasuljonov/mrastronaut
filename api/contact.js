@@ -127,7 +127,15 @@ Faqat aniq faktlar va maslahat boʻlsin. Hech qanday salomlashishsiz, toʻgʻrid
       if (aiData.choices && aiData.choices[0] && aiData.choices[0].message) {
         let rawContent = aiData.choices[0].message.content || '';
         rawContent = normalizeUzbekOrthography(rawContent);
-        aiAnalysis = escapeHtml(rawContent);
+        // Escape HTML first to prevent XSS
+        let safeContent = escapeHtml(rawContent);
+        // Convert Markdown to Telegram HTML
+        safeContent = safeContent.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+        safeContent = safeContent.replace(/__(.*?)__/g, '<b>$1</b>');
+        safeContent = safeContent.replace(/\*(.*?)\*/g, '<i>$1</i>');
+        safeContent = safeContent.replace(/_(.*?)_/g, '<i>$1</i>');
+        safeContent = safeContent.replace(/^-\s/gm, '• ');
+        aiAnalysis = safeContent;
       }
     } else {
       console.error('AI API failed', await aiResponse.text());
@@ -146,7 +154,7 @@ Faqat aniq faktlar va maslahat boʻlsin. Hech qanday salomlashishsiz, toʻgʻrid
   const text = `
 🆕 <b>YANGI BUYURTMA</b>
 
-👤 <b>Ism/Kompaniya:</b> ${safeName}
+👤 <b>Ism:</b> ${safeName}
 📞 <b>Telegram:</b> ${safeContact}
 💼 <b>Xizmat turi:</b> ${safeService}
 💰 <b>Byudjet:</b> ${safeBudget}
