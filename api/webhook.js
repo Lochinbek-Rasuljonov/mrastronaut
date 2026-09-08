@@ -63,15 +63,15 @@ export default async function handler(req, res) {
         [ { text: '🏁 Loyihani topshirish', callback_data: 'status_finished' }, { text: '❌ Bekor qilish', callback_data: 'status_rejected' } ]
       ];
     } else if (data === 'status_finished') {
-      alertText = '🏁 Loyiha tugatildi, to\'lov kutilmoqda!';
+      alertText = '🏁 Loyiha tugatildi, to‘lov kutilmoqda!';
       newKeyboard = [
-        [ { text: '🟣 HOLAT: YAKUNLANDI (To\'lov kutilmoqda)', callback_data: 'ignore' } ],
-        [ { text: '💵 To\'lov qabul qilindi', callback_data: 'status_paid' } ]
+        [ { text: '🟣 HOLAT: YAKUNLANDI (To‘lov kutilmoqda)', callback_data: 'ignore' } ],
+        [ { text: '💵 To‘lov qabul qilindi', callback_data: 'status_paid' } ]
       ];
     } else if (data === 'status_paid') {
-      alertText = '🏆 To\'lov olindi. Tabriklaymiz!';
+      alertText = '🏆 To‘lov olindi. Tabriklaymiz!';
       newKeyboard = [
-        [ { text: '🏆 HOLAT: TUGATILDI VA TO\'LOV OLINDI!', callback_data: 'ignore' } ]
+        [ { text: '🏆 HOLAT: TUGATILDI VA TO‘LOV OLINDI!', callback_data: 'ignore' } ]
       ];
       if (redis) {
         await redis.incr('stats_completed').catch(()=>null);
@@ -139,7 +139,7 @@ export default async function handler(req, res) {
     let replyMarkup = null;
 
     if (text === '/start') {
-      replyText = `Salom janob MrAstronaut! 👨‍🚀\n\nMen sizning shaxsiy AI yordamchingiz va CRM tizimingizman. Nima xizmat?`;
+      replyText = `Salom janob MrAstronaut! 👨‍🚀\n\nBiz sizning shaxsiy AI yordamchingiz va CRM boshqaruv markazingizmiz. Nima xizmat?`;
       replyMarkup = {
         keyboard: [
           [{ text: "📊 Statistika" }, { text: "💬 AI bilan suhbat" }]
@@ -151,7 +151,7 @@ export default async function handler(req, res) {
     else if (text === '📊 Statistika') {
       const redis = await getRedis();
       if (!redis) {
-        replyText = "📊 Hozircha Ma'lumotlar bazasi (DB) ulanmagan. REDIS_URL ni kiritishingiz bilan statistika shu yerda ko'rsatiladi!";
+        replyText = "📊 Hozircha ma’lumotlar bazasi (DB) ulanmagan. REDIS_URL kiritilishi bilan statistika shu yerda ko‘rsatiladi!";
       } else {
         try {
           const accepted = (await redis.get('stats_accepted')) || 0;
@@ -163,9 +163,9 @@ export default async function handler(req, res) {
                       `✅ Qabul qilingan loyihalar: <b>${accepted} ta</b>\n` +
                       `🏆 Muvaffaqiyatli yakunlangan: <b>${completed} ta</b>\n` +
                       `🔴 Rad etilganlar: <b>${rejected} ta</b>\n\n` +
-                      `💰 Umumiy daromad: <b>$${profit}</b>`;
+                      `💰 Umumiy sof foyda: <b>$${profit}</b>`;
         } catch (err) {
-          replyText = "Bazaga ulanishda xatolik yuz berdi. Iltimos keyinroq urining (Baza uyquda bo'lishi mumkin).";
+          replyText = "Bazaga ulanishda xatolik yuz berdi. Iltimos keyinroq urining (Baza uyquda bo‘lishi mumkin).";
         }
       }
       if (redis) redis.quit();
