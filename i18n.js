@@ -1,6 +1,6 @@
 const T = {
   uz: {
-    "page_title": "MrAstronaut — Professional raqamli xizmatlar",
+    "page_title": "MrAstronaut | Web & AI",
     "meta_desc": "Professional raqamli xizmatlar: veb-saytlar, dizayn, Telegram botlar, server sozlamalari va e-tijorat tizimlari. Hoziroq buyurtma bering!",
     "footer_brand": "MrAstronaut",
     "lang_uz": "UZ",
@@ -151,7 +151,7 @@ const T = {
     "footer_copy": "© 2026 MrAstronaut. Barcha huquqlar himoyalangan."
 },
   cy: {
-    "page_title": "MrAstronaut — Профессионал рақамли хизматлар",
+    "page_title": "MrAstronaut | Web & AI",
     "meta_desc": "Профессионал рақамли хизматлар: веб-сайтлар, дизайн, Telegram ботлар, сервер созламалари ва e-тижорат тизимлари. Ҳозироқ буюртма беринг!",
     "footer_brand": "MrAstronaut",
     "lang_uz": "UZ",
@@ -302,7 +302,7 @@ const T = {
     "footer_copy": "© 2026 MrAstronaut. Барча ҳуқуқлар ҳимояланган."
 },
   ru: {
-    "page_title": "MrAstronaut — Профессиональные цифровые услуги",
+    "page_title": "MrAstronaut | Web & AI",
     "meta_desc": "Профессиональные цифровые услуги: разработка сайтов, UI/UX дизайн, Telegram боты, серверные решения и интернет-магазины. Закажите прямо сейчас!",
     "footer_brand": "MrAstronaut",
     "lang_uz": "UZ",
@@ -453,7 +453,7 @@ const T = {
     "footer_copy": "© 2026 MrAstronaut. Все права защищены."
 },
   en: {
-    "page_title": "MrAstronaut — Professional Digital Services",
+    "page_title": "MrAstronaut | Web & AI",
     "meta_desc": "Professional digital services: website development, UI/UX design, Telegram bots, backend systems, and e-commerce. Get started today!",
     "footer_brand": "MrAstronaut",
     "lang_uz": "UZ",
