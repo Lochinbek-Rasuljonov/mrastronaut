@@ -144,6 +144,7 @@ const T = {
     "f_sending": "Yuborilmoqda...",
     "f_note": "24 soat ichida javob beriladi · Bepul maslahatlashuv",
     "toast_msg": "Xabaringiz muvaffaqiyatli yuborildi! Tez orada bogʻlanamiz.",
+    "toast_success_sub": "Buyurtma qabul qilindi",
     "toast_err": "Xatolik yuz berdi. Iltimos, qayta urinib koʻring yoki toʻgʻridan-toʻgʻri Telegram orqali yozing.",
     "footer_tag": "Sifatli, xavfsiz va biznesingizga real foyda keltiruvchi raqamli mahsulotlar yaratamiz.",
     "footer_copy": "© 2026 MrAstronaut. Barcha huquqlar himoyalangan."
@@ -293,6 +294,7 @@ const T = {
     "f_sending": "Юборилмоқда...",
     "f_note": "24 соат ичида жавоб берилади · Бепул маслаҳатлашув",
     "toast_msg": "Хабарингиз муваффақиятли юборилди! Тез орада боғланамиз.",
+    "toast_success_sub": "Буюртма қабул қилинди",
     "toast_err": "Хатолик юз берди. Илтимос, қайта уриниб кўринг ёки тўғридан-тўғри Telegram орқали ёзинг.",
     "footer_tag": "Сифатли, хавфсиз ва бизнесингизга реал фойда келтирувчи рақамли маҳсулотлар яратамиз.",
     "footer_copy": "© 2026 MrAstronaut. Барча ҳуқуқлар ҳимояланган."
@@ -442,6 +444,7 @@ const T = {
     "f_sending": "Отправка...",
     "f_note": "Ответ в течение 24 часов · Бесплатная консультация",
     "toast_msg": "Сообщение успешно отправлено! Мы свяжемся с вами в ближайшее время.",
+    "toast_success_sub": "Заказ принят",
     "toast_err": "Произошла ошибка. Пожалуйста, попробуйте снова или напишите напрямую в Telegram.",
     "footer_tag": "Создаем безопасные, высокопроизводительные цифровые продукты для роста бизнеса.",
     "footer_copy": "© 2026 MrAstronaut. Все права защищены."
@@ -591,6 +594,7 @@ const T = {
     "f_sending": "Sending...",
     "f_note": "Replies within 24 hours · Free consultation included",
     "toast_msg": "Message sent successfully! We will get back to you shortly.",
+    "toast_success_sub": "Order accepted",
     "toast_err": "An error occurred. Please try again or reach out directly via Telegram.",
     "footer_tag": "Engineering secure, high-conversion digital products that scale your business.",
     "footer_copy": "© 2026 MrAstronaut. All rights reserved."

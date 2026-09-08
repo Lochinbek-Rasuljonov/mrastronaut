@@ -214,15 +214,12 @@ const btn=document.getElementById('submitBtn');
 
 let toastTimer=null;
 
-function showToast(isSuccess=true, customMsg=null, actionUrl=null){
+function showToast(isSuccess=true, customMsg=null){
   if(!toast)return;
   const curLang=document.querySelector('.lang-btn.active')?.dataset.lang||'uz';
   const curT=(typeof T!=='undefined'&&T[curLang])||{};
   const iconEl=toast.querySelector('.toast-icon')||toast.querySelector('span:first-child');
   const textEl=toast.querySelector('.toast-text')||toast.querySelector('span:last-child');
-
-  const oldAction = toast.querySelector('.toast-action-btn');
-  if(oldAction) oldAction.remove();
 
   if(isSuccess){
     const msg = curT['toast_msg']||(typeof T!=='undefined'&&T.uz&&T.uz['toast_msg'])||'Xabaringiz muvaffaqiyatli yuborildi! Tez orada bogʻlanamiz.';
@@ -241,23 +238,13 @@ function showToast(isSuccess=true, customMsg=null, actionUrl=null){
     if(iconEl)iconEl.innerHTML='<i class="fa-solid fa-circle-exclamation"></i>';
     if(textEl){
       textEl.dataset.key='toast_err';
-      textEl.textContent=customMsg || curT['toast_err']||(typeof T!=='undefined'&&T.uz&&T.uz['toast_err'])||'Xatolik yuz berdi. Iltimos, qayta urinib koʻring yoki toʻgʻridan-toʻgʻri Telegram orqali yozing.';
-    }
-    if(actionUrl){
-      const actBtn = document.createElement('a');
-      actBtn.className = 'toast-action-btn';
-      actBtn.href = actionUrl;
-      actBtn.target = '_blank';
-      actBtn.rel = 'noopener noreferrer';
-      actBtn.setAttribute('aria-label', 'Telegram orqali toʻgʻridan-toʻgʻri yozish');
-      actBtn.innerHTML = '<i class="fa-brands fa-telegram"></i> <span>Telegram</span>';
-      toast.appendChild(actBtn);
+      textEl.textContent=customMsg || curT['toast_err']||(typeof T!=='undefined'&&T.uz&&T.uz['toast_err'])||'Xatolik yuz berdi. Iltimos, qayta urinib koʻring yoki xatoni tekshiring.';
     }
   }
 
   toast.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>toast.classList.remove('show'), actionUrl ? 10000 : 4500);
+  toastTimer=setTimeout(()=>toast.classList.remove('show'), 4500);
 }
 window.showToast = showToast;
 function validate(){
@@ -350,17 +337,6 @@ if(form){
     const budget = (document.getElementById('f-budget')?.value || '').trim();
     const msg = document.getElementById('f-msg').value.trim();
 
-    // Prepare direct Telegram fallback URL in case backend is protected by Vercel SSO or unavailable
-    const tgPrefill = encodeURIComponent(
-      `Assalomu alaykum!\n\n` +
-      `Ism: ${name}\n` +
-      `Aloqa: ${contact}\n` +
-      `Xizmat: ${service}\n` +
-      `Byudjet: ${budget}\n\n` +
-      `Loyiha haqida:\n${msg}`
-    );
-    const fallbackTgUrl = `https://t.me/REDACTED?text=${tgPrefill}`;
-
     let isOk = false;
     let customErrorMsg = '';
 
@@ -378,10 +354,10 @@ if(form){
       const ct = resp.headers.get('content-type') || '';
 
       if (resp.redirected) {
-        customErrorMsg = 'Vercel Deployment Protection (SSO) faol. Iltimos, Telegram orqali yuboring.';
+        customErrorMsg = 'Vercel Deployment Protection (SSO) faol. Iltimos, keyinroq urinib koring.';
         isOk = false;
       } else if (resp.status === 401 || resp.status === 403) {
-        customErrorMsg = 'Ruxsat berilmagan (Vercel himoyasi faol). Iltimos, Telegram orqali yuboring.';
+        customErrorMsg = 'Ruxsat berilmagan (Vercel himoyasi faol). Iltimos, keyinroq urinib koring.';
         isOk = false;
       } else if (resp.ok) {
         if (ct.includes('application/json')) {
@@ -393,7 +369,7 @@ if(form){
             customErrorMsg = data?.error || 'Serverda kutilmagan xatolik yuz berdi.';
           }
         } else {
-          customErrorMsg = 'Serverdan kutilmagan javob keldi (Vercel SSO yoki xavfsizlik sahifasi). Telegram orqali yuboring.';
+          customErrorMsg = 'Serverdan kutilmagan javob keldi (Vercel SSO yoki xavfsizlik sahifasi). Iltimos, keyinroq urinib koring.';
           isOk = false;
         }
       } else {
@@ -401,18 +377,18 @@ if(form){
           const errData = await resp.json().catch(() => null);
           customErrorMsg = errData?.error || 'Server xatosi yuz berdi.';
         } else if (ct.includes('text/html')) {
-          customErrorMsg = 'Server javob bermadi (Vercel SSO yoki notoʻgʻri marshrut). Telegram orqali yuboring.';
+          customErrorMsg = 'Server javob bermadi (Vercel SSO yoki notoʻgʻri marshrut). Iltimos, keyinroq urinib koring.';
         } else {
-          customErrorMsg = `Xatolik yuz berdi (Status: ${resp.status}). Telegram orqali yuboring.`;
+          customErrorMsg = `Xatolik yuz berdi (Status: ${resp.status}). Iltimos, keyinroq urinib koring.`;
         }
         isOk = false;
       }
     } catch(err) {
-      console.error('Telegram dispatch error:', err);
+      console.error('Fetch error:', err);
       if (err.name === 'AbortError') {
-        customErrorMsg = 'Soʻrov vaqti tugadi (Timeout). Iltimos, qayta urinib koʻring yoki Telegram orqali yozing.';
+        customErrorMsg = 'Soʻrov vaqti tugadi (Timeout). Iltimos, qayta urinib koʻring.';
       } else {
-        customErrorMsg = 'Tarmoq xatosi yuz berdi. Iltimos, Telegram orqali toʻgʻridan-toʻgʻri yozing.';
+        customErrorMsg = 'Tarmoq xatosi yuz berdi. Iltimos, keyinroq urinib koring.';
       }
       isOk = false;
     }
@@ -442,9 +418,9 @@ if(form){
       showToast(true);
     } else {
       if (!customErrorMsg) {
-        customErrorMsg = curT['toast_err'] || (typeof T !== 'undefined' && T.uz && T.uz['toast_err']) || 'Xatolik yuz berdi. Iltimos, qayta urinib koʻring yoki toʻgʻridan-toʻgʻri Telegram orqali yozing.';
+        customErrorMsg = curT['toast_err'] || (typeof T !== 'undefined' && T.uz && T.uz['toast_err']) || 'Xatolik yuz berdi. Iltimos, qayta urinib koʻring yoki xatoni tekshiring.';
       }
-      showToast(false, customErrorMsg, fallbackTgUrl);
+      showToast(false, customErrorMsg);
     }
   });
 }
@@ -629,13 +605,17 @@ function showSuccess3DAnimation(messageText) {
   textContainer.style.textAlign = 'center';
   textContainer.style.transition = 'all 1s cubic-bezier(0.16, 1, 0.3, 1)';
   
+  const curLang = document.querySelector('.lang-btn.active')?.dataset.lang || 'uz';
+  const curT = (typeof T !== 'undefined' && T[curLang]) || {};
+  const subText = curT['toast_success_sub'] || 'Buyurtma qabul qilindi';
+
   textContainer.innerHTML = `
     <div style="font-size: clamp(24px, 4vw, 36px); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; background: linear-gradient(135deg, #fff 0%, #aaa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0px 4px 20px rgba(255,255,255,0.1);">
       ${messageText}
     </div>
     <div style="margin-top: 15px; font-size: clamp(14px, 2vw, 16px); color: #888; letter-spacing: 1px; font-weight: 300; display: flex; align-items: center; justify-content: center; gap: 8px;">
       <span style="display:inline-block; width: 8px; height: 8px; background: #4ade80; border-radius: 50%; box-shadow: 0 0 10px #4ade80;"></span>
-      <span>Tizim qabul qildi</span>
+      <span>${subText}</span>
     </div>
   `;
   overlay.appendChild(textContainer);
@@ -657,42 +637,40 @@ function showSuccess3DAnimation(messageText) {
   window.addEventListener('resize', resize);
   resize();
 
-  const numParticles = 300;
-  const particles = [];
-  
-  for (let i = 0; i < numParticles; i++) {
-    let tx, ty, tz;
-    
-    if (Math.random() < 0.35) {
-      // Short leg of checkmark
-      let t = Math.random();
-      tx = -40 + t * 25;
-      ty = -10 + t * 40;
-    } else {
-      // Long leg of checkmark
-      let t = Math.random();
-      tx = -15 + t * 75;
-      ty = 30 - t * 70;
+  // Create 3D wireframe sphere (planet) nodes
+  const nodes = [];
+  const radius = 100;
+  const latitudes = 12;
+  const longitudes = 24;
+
+  for (let lat = 0; lat <= latitudes; lat++) {
+    const theta = (lat * Math.PI) / latitudes;
+    const sinTheta = Math.sin(theta);
+    const cosTheta = Math.cos(theta);
+
+    for (let lon = 0; lon <= longitudes; lon++) {
+      const phi = (lon * 2 * Math.PI) / longitudes;
+      const sinPhi = Math.sin(phi);
+      const cosPhi = Math.cos(phi);
+
+      const x = radius * sinTheta * cosPhi;
+      const y = radius * cosTheta;
+      const z = radius * sinTheta * sinPhi;
+      nodes.push({ x, y, z });
     }
+  }
 
-    // Volume noise
-    tx += (Math.random() - 0.5) * 15;
-    ty += (Math.random() - 0.5) * 15;
-    tz = (Math.random() - 0.5) * 15;
+  // Define edges
+  const edges = [];
+  for (let lat = 0; lat < latitudes; lat++) {
+    for (let lon = 0; lon < longitudes; lon++) {
+      const current = lat * (longitudes + 1) + lon;
+      const nextLon = current + 1;
+      const nextLat = (lat + 1) * (longitudes + 1) + lon;
 
-    let ix = (Math.random() - 0.5) * 3000;
-    let iy = (Math.random() - 0.5) * 3000;
-    let iz = (Math.random() - 0.5) * 3000 + 1000;
-
-    particles.push({
-      x: ix, y: iy, z: iz,
-      ox: ix, oy: iy, oz: iz,
-      tx: tx, ty: ty, tz: tz,
-      baseColor: Math.random() > 0.4 ? '#4ade80' : '#10b981',
-      size: Math.random() * 2 + 1,
-      delay: Math.random() * 800,
-      sx: 0, sy: 0, scale: 0, t: 0
-    });
+      edges.push([current, nextLon]); // Horizontal
+      edges.push([current, nextLat]); // Vertical
+    }
   }
 
   let startTime = Date.now();
@@ -704,7 +682,7 @@ function showSuccess3DAnimation(messageText) {
     let elapsed = now - startTime;
 
     // Dark bg with motion blur effect
-    ctx.fillStyle = 'rgba(10, 10, 15, 0.3)';
+    ctx.fillStyle = 'rgba(10, 10, 15, 0.4)';
     ctx.fillRect(0, 0, w, h);
 
     if (elapsed > 1200) {
@@ -712,86 +690,70 @@ function showSuccess3DAnimation(messageText) {
       textContainer.style.transform = 'translateX(-50%) translateY(0)';
     }
 
-    // Sort by Z for painters algorithm
-    particles.sort((a, b) => b.z - a.z);
+    let rotX = elapsed * 0.0005;
+    let rotY = elapsed * 0.001;
 
-    // Global rotation to rotate the entire checkmark in 3D space
-    // Smoothly settle to a slight tilt
-    let rotEase = Math.min(1, elapsed / 2500);
-    let rotX = Math.sin(elapsed * 0.001) * 0.2 * (1 - rotEase);
-    let rotY = elapsed * 0.002 * (1 - rotEase) + Math.sin(elapsed * 0.0005) * 0.3;
-
+    // Project and draw edges
     ctx.beginPath();
-    ctx.strokeStyle = 'rgba(74, 222, 128, 0.15)';
-    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = 'rgba(74, 222, 128, 0.6)';
+    ctx.lineWidth = 1;
 
-    for (let i = 0; i < particles.length; i++) {
-      let p = particles[i];
+    for (let i = 0; i < edges.length; i++) {
+      const e = edges[i];
+      const p1 = nodes[e[0]];
+      const p2 = nodes[e[1]];
 
-      // Morphing interpolation
-      let t = Math.max(0, Math.min(1, (elapsed - p.delay) / 1500));
-      t = 1 - Math.pow(1 - t, 3); // ease-out cubic
-      p.t = t;
+      // Rotate p1
+      let y1 = p1.y * Math.cos(rotX) - p1.z * Math.sin(rotX);
+      let z1 = p1.y * Math.sin(rotX) + p1.z * Math.cos(rotX);
+      let x1 = p1.x * Math.cos(rotY) - z1 * Math.sin(rotY);
+      z1 = p1.x * Math.sin(rotY) + z1 * Math.cos(rotY);
 
-      p.x = p.ox + (p.tx - p.ox) * t;
-      p.y = p.oy + (p.ty - p.oy) * t;
-      p.z = p.oz + (p.tz - p.oz) * t;
+      // Rotate p2
+      let y2 = p2.y * Math.cos(rotX) - p2.z * Math.sin(rotX);
+      let z2 = p2.y * Math.sin(rotX) + p2.z * Math.cos(rotX);
+      let x2 = p2.x * Math.cos(rotY) - z2 * Math.sin(rotY);
+      z2 = p2.x * Math.sin(rotY) + z2 * Math.cos(rotY);
 
-      // Slight wobble to make it feel alive
-      let wobbleX = Math.sin(elapsed * 0.002 + i) * 3 * t;
-      let wobbleY = Math.cos(elapsed * 0.002 + i) * 3 * t;
+      // Scale and position
+      let z1Offset = z1 + 300;
+      let z2Offset = z2 + 300;
+      if (z1Offset < 1) z1Offset = 1;
+      if (z2Offset < 1) z2Offset = 1;
 
-      let rx = p.x + wobbleX;
-      let ry = p.y + wobbleY;
-      let rz = p.z;
+      let scale1 = fov / z1Offset;
+      let scale2 = fov / z2Offset;
 
-      // Apply rotations
-      let rpx = rx * Math.cos(rotY) - rz * Math.sin(rotY);
-      let rpz = rx * Math.sin(rotY) + rz * Math.cos(rotY);
-      
-      let finalY = ry * Math.cos(rotX) - rpz * Math.sin(rotX);
-      let finalZ = ry * Math.sin(rotX) + rpz * Math.cos(rotX);
-      let finalX = rpx;
+      let sx1 = x1 * scale1 + cx;
+      let sy1 = y1 * scale1 + cy;
+      let sx2 = x2 * scale2 + cx;
+      let sy2 = y2 * scale2 + cy;
 
-      finalZ += 250; // Distance from camera
-
-      if (finalZ < 1) finalZ = 1;
-
-      let scale = fov / finalZ;
-      p.scale = scale;
-      p.sx = finalX * scale + cx;
-      p.sy = finalY * scale + cy;
-
-      let alpha = Math.min(1, scale * 1.5);
-      
-      // Connection lines
-      if (t > 0.8 && i < particles.length - 2 && i % 2 === 0) {
-         let p2 = particles[i + 1];
-         let d = Math.hypot(p.tx - p2.tx, p.ty - p2.ty, p.tz - p2.tz);
-         if (d < 25) {
-            ctx.moveTo(p.sx, p.sy);
-            ctx.lineTo(p2.sx, p2.sy);
-         }
-      }
-
-      if (alpha > 0.05) {
-        ctx.beginPath();
-        ctx.arc(p.sx, p.sy, p.size * scale, 0, Math.PI * 2);
-        if (t > 0.9) {
-           ctx.fillStyle = p.baseColor;
-           ctx.shadowBlur = 15;
-           ctx.shadowColor = p.baseColor;
-        } else {
-           ctx.fillStyle = `rgba(107, 114, 128, ${alpha})`;
-           ctx.shadowBlur = 0;
-        }
-        ctx.fill();
-        ctx.shadowBlur = 0; // reset for next
-      }
+      ctx.moveTo(sx1, sy1);
+      ctx.lineTo(sx2, sy2);
     }
-    
-    // Draw all connections in one stroke for performance
     ctx.stroke();
+
+    // Draw nodes slightly brighter
+    ctx.fillStyle = '#4ade80';
+    for (let i = 0; i < nodes.length; i++) {
+      const p = nodes[i];
+      let y1 = p.y * Math.cos(rotX) - p.z * Math.sin(rotX);
+      let z1 = p.y * Math.sin(rotX) + p.z * Math.cos(rotX);
+      let x1 = p.x * Math.cos(rotY) - z1 * Math.sin(rotY);
+      z1 = p.x * Math.sin(rotY) + z1 * Math.cos(rotY);
+
+      let z1Offset = z1 + 300;
+      if (z1Offset < 1) z1Offset = 1;
+      let scale1 = fov / z1Offset;
+
+      let sx1 = x1 * scale1 + cx;
+      let sy1 = y1 * scale1 + cy;
+
+      ctx.beginPath();
+      ctx.arc(sx1, sy1, 1.5 * scale1, 0, Math.PI * 2);
+      ctx.fill();
+    }
 
     animationFrameId = requestAnimationFrame(animate);
   }
