@@ -225,18 +225,23 @@ function showToast(isSuccess=true, customMsg=null, actionUrl=null){
   if(oldAction) oldAction.remove();
 
   if(isSuccess){
+    const msg = curT['toast_msg']||(typeof T!=='undefined'&&T.uz&&T.uz['toast_msg'])||'Xabaringiz muvaffaqiyatli yuborildi! Tez orada bogʻlanamiz.';
+    if(typeof showSuccess3DAnimation === 'function'){
+      showSuccess3DAnimation(msg);
+      return;
+    }
     toast.classList.remove('is-error');
     if(iconEl)iconEl.innerHTML='<i class="fa-solid fa-circle-check"></i>';
     if(textEl){
       textEl.dataset.key='toast_msg';
-      textEl.textContent=curT['toast_msg']||(typeof T!=='undefined'&&T.uz&&T.uz['toast_msg'])||'Xabaringiz muvaffaqiyatli yuborildi! Tez orada bog‘lanamiz.';
+      textEl.textContent=msg;
     }
   }else{
     toast.classList.add('is-error');
     if(iconEl)iconEl.innerHTML='<i class="fa-solid fa-circle-exclamation"></i>';
     if(textEl){
       textEl.dataset.key='toast_err';
-      textEl.textContent=customMsg || curT['toast_err']||(typeof T!=='undefined'&&T.uz&&T.uz['toast_err'])||'Xatolik yuz berdi. Iltimos, qayta urinib ko‘ring yoki to‘g‘ridan-to‘g‘ri Telegram orqali yozing.';
+      textEl.textContent=customMsg || curT['toast_err']||(typeof T!=='undefined'&&T.uz&&T.uz['toast_err'])||'Xatolik yuz berdi. Iltimos, qayta urinib koʻring yoki toʻgʻridan-toʻgʻri Telegram orqali yozing.';
     }
     if(actionUrl){
       const actBtn = document.createElement('a');
@@ -244,7 +249,7 @@ function showToast(isSuccess=true, customMsg=null, actionUrl=null){
       actBtn.href = actionUrl;
       actBtn.target = '_blank';
       actBtn.rel = 'noopener noreferrer';
-      actBtn.setAttribute('aria-label', 'Telegram orqali to‘g‘ridan-to‘g‘ri yozish');
+      actBtn.setAttribute('aria-label', 'Telegram orqali toʻgʻridan-toʻgʻri yozish');
       actBtn.innerHTML = '<i class="fa-brands fa-telegram"></i> <span>Telegram</span>';
       toast.appendChild(actBtn);
     }
@@ -396,7 +401,7 @@ if(form){
           const errData = await resp.json().catch(() => null);
           customErrorMsg = errData?.error || 'Server xatosi yuz berdi.';
         } else if (ct.includes('text/html')) {
-          customErrorMsg = 'Server javob bermadi (Vercel SSO yoki noto‘g‘ri marshrut). Telegram orqali yuboring.';
+          customErrorMsg = 'Server javob bermadi (Vercel SSO yoki notoʻgʻri marshrut). Telegram orqali yuboring.';
         } else {
           customErrorMsg = `Xatolik yuz berdi (Status: ${resp.status}). Telegram orqali yuboring.`;
         }
@@ -405,9 +410,9 @@ if(form){
     } catch(err) {
       console.error('Telegram dispatch error:', err);
       if (err.name === 'AbortError') {
-        customErrorMsg = 'So‘rov vaqti tugadi (Timeout). Iltimos, qayta urinib ko‘ring yoki Telegram orqali yozing.';
+        customErrorMsg = 'Soʻrov vaqti tugadi (Timeout). Iltimos, qayta urinib koʻring yoki Telegram orqali yozing.';
       } else {
-        customErrorMsg = 'Tarmoq xatosi yuz berdi. Iltimos, Telegram orqali to‘g‘ridan-to‘g‘ri yozing.';
+        customErrorMsg = 'Tarmoq xatosi yuz berdi. Iltimos, Telegram orqali toʻgʻridan-toʻgʻri yozing.';
       }
       isOk = false;
     }
@@ -437,7 +442,7 @@ if(form){
       showToast(true);
     } else {
       if (!customErrorMsg) {
-        customErrorMsg = curT['toast_err'] || (typeof T !== 'undefined' && T.uz && T.uz['toast_err']) || 'Xatolik yuz berdi. Iltimos, qayta urinib ko‘ring yoki to‘g‘ridan-to‘g‘ri Telegram orqali yozing.';
+        customErrorMsg = curT['toast_err'] || (typeof T !== 'undefined' && T.uz && T.uz['toast_err']) || 'Xatolik yuz berdi. Iltimos, qayta urinib koʻring yoki toʻgʻridan-toʻgʻri Telegram orqali yozing.';
       }
       showToast(false, customErrorMsg, fallbackTgUrl);
     }
@@ -476,10 +481,6 @@ if (bgVideo) {
   });
   window.addEventListener('focus', ensurePlay);
   document.addEventListener('touchstart', ensurePlay, { once: true, passive: true });
-  bgVideo.addEventListener('ended', () => {
-    bgVideo.currentTime = 0;
-    ensurePlay();
-  });
 }
 
 })();
@@ -583,4 +584,225 @@ if (dd) {
       closeDropdown();
     }
   });
+}
+
+/* ── SUCCESS 3D ANIMATION ──────────────────────────────── */
+function showSuccess3DAnimation(messageText) {
+  const existing = document.getElementById('success-3d-overlay');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'success-3d-overlay';
+  overlay.style.position = 'fixed';
+  overlay.style.top = '0';
+  overlay.style.left = '0';
+  overlay.style.width = '100%';
+  overlay.style.height = '100%';
+  overlay.style.backgroundColor = 'rgba(10, 10, 15, 0.95)';
+  overlay.style.backdropFilter = 'blur(10px)';
+  overlay.style.zIndex = '999999';
+  overlay.style.display = 'flex';
+  overlay.style.flexDirection = 'column';
+  overlay.style.alignItems = 'center';
+  overlay.style.justifyContent = 'center';
+  overlay.style.opacity = '0';
+  overlay.style.transition = 'opacity 0.6s ease-out';
+  overlay.style.overflow = 'hidden';
+  
+  const canvas = document.createElement('canvas');
+  canvas.style.position = 'absolute';
+  canvas.style.top = '0';
+  canvas.style.left = '0';
+  canvas.style.width = '100%';
+  canvas.style.height = '100%';
+  overlay.appendChild(canvas);
+
+  const textContainer = document.createElement('div');
+  textContainer.style.position = 'absolute';
+  textContainer.style.zIndex = '2';
+  textContainer.style.bottom = '20%';
+  textContainer.style.left = '50%';
+  textContainer.style.transform = 'translateX(-50%) translateY(30px)';
+  textContainer.style.opacity = '0';
+  textContainer.style.color = '#fff';
+  textContainer.style.fontFamily = '"Space Grotesk", var(--sans), sans-serif';
+  textContainer.style.textAlign = 'center';
+  textContainer.style.transition = 'all 1s cubic-bezier(0.16, 1, 0.3, 1)';
+  
+  textContainer.innerHTML = `
+    <div style="font-size: clamp(24px, 4vw, 36px); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; background: linear-gradient(135deg, #fff 0%, #aaa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0px 4px 20px rgba(255,255,255,0.1);">
+      ${messageText}
+    </div>
+    <div style="margin-top: 15px; font-size: clamp(14px, 2vw, 16px); color: #888; letter-spacing: 1px; font-weight: 300; display: flex; align-items: center; justify-content: center; gap: 8px;">
+      <span style="display:inline-block; width: 8px; height: 8px; background: #4ade80; border-radius: 50%; box-shadow: 0 0 10px #4ade80;"></span>
+      <span>Tizim qabul qildi</span>
+    </div>
+  `;
+  overlay.appendChild(textContainer);
+  document.body.appendChild(overlay);
+
+  requestAnimationFrame(() => {
+    overlay.style.opacity = '1';
+  });
+
+  const ctx = canvas.getContext('2d', { alpha: false });
+  let w, h, cx, cy;
+
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+    cx = w / 2;
+    cy = h / 2 - 40;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  const numParticles = 300;
+  const particles = [];
+  
+  for (let i = 0; i < numParticles; i++) {
+    let tx, ty, tz;
+    
+    if (Math.random() < 0.35) {
+      // Short leg of checkmark
+      let t = Math.random();
+      tx = -40 + t * 25;
+      ty = -10 + t * 40;
+    } else {
+      // Long leg of checkmark
+      let t = Math.random();
+      tx = -15 + t * 75;
+      ty = 30 - t * 70;
+    }
+
+    // Volume noise
+    tx += (Math.random() - 0.5) * 15;
+    ty += (Math.random() - 0.5) * 15;
+    tz = (Math.random() - 0.5) * 15;
+
+    let ix = (Math.random() - 0.5) * 3000;
+    let iy = (Math.random() - 0.5) * 3000;
+    let iz = (Math.random() - 0.5) * 3000 + 1000;
+
+    particles.push({
+      x: ix, y: iy, z: iz,
+      ox: ix, oy: iy, oz: iz,
+      tx: tx, ty: ty, tz: tz,
+      baseColor: Math.random() > 0.4 ? '#4ade80' : '#10b981',
+      size: Math.random() * 2 + 1,
+      delay: Math.random() * 800,
+      sx: 0, sy: 0, scale: 0, t: 0
+    });
+  }
+
+  let startTime = Date.now();
+  let animationFrameId;
+  const fov = 400;
+
+  function animate() {
+    let now = Date.now();
+    let elapsed = now - startTime;
+
+    // Dark bg with motion blur effect
+    ctx.fillStyle = 'rgba(10, 10, 15, 0.3)';
+    ctx.fillRect(0, 0, w, h);
+
+    if (elapsed > 1200) {
+      textContainer.style.opacity = '1';
+      textContainer.style.transform = 'translateX(-50%) translateY(0)';
+    }
+
+    // Sort by Z for painters algorithm
+    particles.sort((a, b) => b.z - a.z);
+
+    // Global rotation to rotate the entire checkmark in 3D space
+    // Smoothly settle to a slight tilt
+    let rotEase = Math.min(1, elapsed / 2500);
+    let rotX = Math.sin(elapsed * 0.001) * 0.2 * (1 - rotEase);
+    let rotY = elapsed * 0.002 * (1 - rotEase) + Math.sin(elapsed * 0.0005) * 0.3;
+
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(74, 222, 128, 0.15)';
+    ctx.lineWidth = 1.5;
+
+    for (let i = 0; i < particles.length; i++) {
+      let p = particles[i];
+
+      // Morphing interpolation
+      let t = Math.max(0, Math.min(1, (elapsed - p.delay) / 1500));
+      t = 1 - Math.pow(1 - t, 3); // ease-out cubic
+      p.t = t;
+
+      p.x = p.ox + (p.tx - p.ox) * t;
+      p.y = p.oy + (p.ty - p.oy) * t;
+      p.z = p.oz + (p.tz - p.oz) * t;
+
+      // Slight wobble to make it feel alive
+      let wobbleX = Math.sin(elapsed * 0.002 + i) * 3 * t;
+      let wobbleY = Math.cos(elapsed * 0.002 + i) * 3 * t;
+
+      let rx = p.x + wobbleX;
+      let ry = p.y + wobbleY;
+      let rz = p.z;
+
+      // Apply rotations
+      let rpx = rx * Math.cos(rotY) - rz * Math.sin(rotY);
+      let rpz = rx * Math.sin(rotY) + rz * Math.cos(rotY);
+      
+      let finalY = ry * Math.cos(rotX) - rpz * Math.sin(rotX);
+      let finalZ = ry * Math.sin(rotX) + rpz * Math.cos(rotX);
+      let finalX = rpx;
+
+      finalZ += 250; // Distance from camera
+
+      if (finalZ < 1) finalZ = 1;
+
+      let scale = fov / finalZ;
+      p.scale = scale;
+      p.sx = finalX * scale + cx;
+      p.sy = finalY * scale + cy;
+
+      let alpha = Math.min(1, scale * 1.5);
+      
+      // Connection lines
+      if (t > 0.8 && i < particles.length - 2 && i % 2 === 0) {
+         let p2 = particles[i + 1];
+         let d = Math.hypot(p.tx - p2.tx, p.ty - p2.ty, p.tz - p2.tz);
+         if (d < 25) {
+            ctx.moveTo(p.sx, p.sy);
+            ctx.lineTo(p2.sx, p2.sy);
+         }
+      }
+
+      if (alpha > 0.05) {
+        ctx.beginPath();
+        ctx.arc(p.sx, p.sy, p.size * scale, 0, Math.PI * 2);
+        if (t > 0.9) {
+           ctx.fillStyle = p.baseColor;
+           ctx.shadowBlur = 15;
+           ctx.shadowColor = p.baseColor;
+        } else {
+           ctx.fillStyle = `rgba(107, 114, 128, ${alpha})`;
+           ctx.shadowBlur = 0;
+        }
+        ctx.fill();
+        ctx.shadowBlur = 0; // reset for next
+      }
+    }
+    
+    // Draw all connections in one stroke for performance
+    ctx.stroke();
+
+    animationFrameId = requestAnimationFrame(animate);
+  }
+  animate();
+
+  setTimeout(() => {
+    overlay.style.opacity = '0';
+    setTimeout(() => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener('resize', resize);
+      if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+    }, 600);
+  }, 5000);
 }

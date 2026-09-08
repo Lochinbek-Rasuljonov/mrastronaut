@@ -4,15 +4,15 @@ export function normalizeUzbekOrthography(text) {
   let res = text.replace(/«([^«»\r\n]+)»/g, '“$1”');
   res = res.replace(/"([^"\r\n]+)"/g, '“$1”');
 
-  // 2. O‘, o‘, G‘, g‘ with left curly apostrophe ‘ (U+2018)
-  // Followed by letters (o‘z, g‘oya) or word boundary/whitespace/punctuation (tog‘, bog‘)
-  res = res.replace(/([OoGg])['`’ʻʼ´](?=[a-zA-Z\u0400-\u04FF]|\s|[.,!?;:)]|$)/g, (m, p1) => p1 + '‘');
+  // 2. Oʻ, oʻ, Gʻ, gʻ with left curly apostrophe ʻ (U+2018)
+  // Followed by letters (oʻz, gʻoya) or word boundary/whitespace/punctuation (togʻ, bogʻ)
+  res = res.replace(/([OoGg])['`ʼʻʼ´](?=[a-zA-Z\u0400-\u04FF]|\s|[.,!?;:)]|$)/g, (m, p1) => p1 + 'ʻ');
 
-  // 3. Tutuq belgisi with right curly apostrophe ’ (U+2019)
-  // Between letters (except O/G handled above): ma’lumot, san’at, mas’ul, ta’minlash, etc.
-  res = res.replace(/([a-zA-Z\u0400-\u04FF])['`‘ʻʼ´]([a-zA-Z\u0400-\u04FF])/g, (m, p1, p2) => {
-    if (/^[og]$/i.test(p1)) return p1 + '‘' + p2;
-    return p1 + '’' + p2;
+  // 3. Tutuq belgisi with right curly apostrophe ʼ (U+2019)
+  // Between letters (except O/G handled above): maʼlumot, sanʼat, masʼul, taʼminlash, etc.
+  res = res.replace(/([a-zA-Z\u0400-\u04FF])['`ʻʻʼ´]([a-zA-Z\u0400-\u04FF])/g, (m, p1, p2) => {
+    if (/^[og]$/i.test(p1)) return p1 + 'ʻ' + p2;
+    return p1 + 'ʼ' + p2;
   });
 
   return res;
@@ -44,7 +44,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Ism kiritilishi shart' });
   }
   if (!contact || !contact.trim()) {
-    return res.status(400).json({ error: 'Telegram aloqa ma’lumoti kiritilishi shart' });
+    return res.status(400).json({ error: 'Telegram aloqa maʼlumoti kiritilishi shart' });
   }
   const invalidServicePlaceholders = [
     'tanlanmadi',
@@ -63,7 +63,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Loyiha haqida xabar kiritilishi shart' });
   }
   if (message.trim().length < 20) {
-    return res.status(400).json({ error: 'Loyiha haqida xabar kamida 20 ta harfdan iborat bo‘lishi kerak' });
+    return res.status(400).json({ error: 'Loyiha haqida xabar kamida 20 ta harfdan iborat boʻlishi kerak' });
   }
 
   const cleanName = name.trim().slice(0, 100);
@@ -92,16 +92,16 @@ export default async function handler(req, res) {
   let aiAnalysis = '<i>AI tahlili mavjud emas.</i>';
   try {
     const aiPrompt = `Siz qobiliyatli IT konsultantsiz. MrAstronaut ismli frilanserga yordam beryapsiz.
-Yangi mijoz quyidagi loyiha so‘rovini yubordi:
+Yangi mijoz quyidagi loyiha soʻrovini yubordi:
 - Xizmat turi: ${cleanService}
 - Byudjet: ${cleanBudget}
 - Mijozning xabari: ${cleanMessage}
 
-Iltimos, ushbu mijoz so‘rovini tahlil qilib, qisqa 3–4 ta band (nuqtachalar) bilan quyidagilarni o‘zbek tilida yozing:
+Iltimos, ushbu mijoz soʻrovini tahlil qilib, qisqa 3–4 ta band (nuqtachalar) bilan quyidagilarni oʻzbek tilida yozing:
 1. Loyiha uchun qaysi texnologiyalar (Tech Stack) eng mos keladi?
-2. Boshlang‘ich narxni qanday aytish va qanday sotish strategiyasini qo‘llash kerak?
+2. Boshlangʻich narxni qanday aytish va qanday sotish strategiyasini qoʻllash kerak?
 3. Mijozning xabaridagi asosiy xavf yoki talab nima?
-Faqat aniq faktlar va maslahat bo‘lsin. Hech qanday salomlashishsiz, to‘g‘ridan-to‘g‘ri tahlilni yozing. QAT’IY QOIDA: O‘zbek tili grammatikasi va imlo qoidalariga 100% amal qiling. O‘ va G‘ harflarida har doim to‘g‘ri chapga egilgan apostrof belgisini ishlating (O‘, o‘, G‘, g‘). Ularni oddiy to‘g‘ri tutuq belgisi yoki birikmali tirnoqlar bilan almashtirmang. Tutuq belgisini (’) o‘z o‘rnida va to‘g‘ri shaklda qo‘llang. Matndagi barcha iqtibos va nomlarni standart qo‘shtirnoqlar (“...”) ichida bering. Har bir gap va so‘z grammatik jihatdan benuqson bo‘lsin.`;
+Faqat aniq faktlar va maslahat boʻlsin. Hech qanday salomlashishsiz, toʻgʻridan-toʻgʻri tahlilni yozing. QATʼIY QOIDA: Oʻzbek tili grammatikasi va imlo qoidalariga 100% amal qiling. Oʻ va Gʻ harflarida har doim toʻgʻri chapga egilgan apostrof belgisini ishlating (Oʻ, oʻ, Gʻ, gʻ). Ularni oddiy toʻgʻri tutuq belgisi yoki birikmali tirnoqlar bilan almashtirmang. Tutuq belgisini (ʼ) oʻz oʻrnida va toʻgʻri shaklda qoʻllang. Matndagi barcha iqtibos va nomlarni standart qoʻshtirnoqlar (“...”) ichida bering. Har bir gap va soʻz grammatik jihatdan benuqson boʻlsin.`;
 
     const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
     const timeout = controller ? setTimeout(() => controller.abort(), 4000) : null;
@@ -115,6 +115,7 @@ Faqat aniq faktlar va maslahat bo‘lsin. Hech qanday salomlashishsiz, to‘g‘
       body: JSON.stringify({
         model: 'mercury-2',
         reasoning_effort: 'low',
+        max_tokens: 300,
         messages: [{ role: 'user', content: aiPrompt }]
       }),
       signal: controller ? controller.signal : undefined
@@ -150,7 +151,7 @@ Faqat aniq faktlar va maslahat bo‘lsin. Hech qanday salomlashishsiz, to‘g‘
 💼 <b>Xizmat turi:</b> ${safeService}
 💰 <b>Byudjet:</b> ${safeBudget}
 
-📝 <b>Qisqacha ma’lumot:</b>
+📝 <b>Qisqacha maʼlumot:</b>
 <i>${safeMessage}</i>
 
 🤖 <b>AI Yordamchi Tahlili:</b>
@@ -186,9 +187,9 @@ ${aiAnalysis}
     } else {
       let desc = data?.description || 'Telegram API xatosi';
       if (desc.includes('Unauthorized')) {
-        desc = 'Telegram bot tokeni noto‘g‘ri yoki bekor qilingan (Unauthorized).';
+        desc = 'Telegram bot tokeni notoʻgʻri yoki bekor qilingan (Unauthorized).';
       } else if (desc.includes('chat not found')) {
-        desc = 'Telegram chat topilmadi (Botga avval /start yuborilgan bo‘lishi kerak).';
+        desc = 'Telegram chat topilmadi (Botga avval /start yuborilgan boʻlishi kerak).';
       } else if (desc.includes('bot was blocked')) {
         desc = 'Telegram bot bloklangan. Iltimos, botni blokdan chiqaring.';
       }

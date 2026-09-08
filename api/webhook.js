@@ -4,15 +4,15 @@ export function normalizeUzbekOrthography(text) {
   let res = text.replace(/«([^«»\r\n]+)»/g, '“$1”');
   res = res.replace(/"([^"\r\n]+)"/g, '“$1”');
 
-  // 2. O‘, o‘, G‘, g‘ with left curly apostrophe ‘ (U+2018)
-  // Followed by letters (o‘z, g‘oya) or word boundary/whitespace/punctuation (tog‘, bog‘)
-  res = res.replace(/([OoGg])['`’ʻʼ´](?=[a-zA-Z\u0400-\u04FF]|\s|[.,!?;:)]|$)/g, (m, p1) => p1 + '‘');
+  // 2. Oʻ, oʻ, Gʻ, gʻ with left curly apostrophe ʻ (U+2018)
+  // Followed by letters (oʻz, gʻoya) or word boundary/whitespace/punctuation (togʻ, bogʻ)
+  res = res.replace(/([OoGg])['`ʼʻʼ´](?=[a-zA-Z\u0400-\u04FF]|\s|[.,!?;:)]|$)/g, (m, p1) => p1 + 'ʻ');
 
-  // 3. Tutuq belgisi with right curly apostrophe ’ (U+2019)
-  // Between letters (except O/G handled above): ma’lumot, san’at, mas’ul, ta’minlash, etc.
-  res = res.replace(/([a-zA-Z\u0400-\u04FF])['`‘ʻʼ´]([a-zA-Z\u0400-\u04FF])/g, (m, p1, p2) => {
-    if (/^[og]$/i.test(p1)) return p1 + '‘' + p2;
-    return p1 + '’' + p2;
+  // 3. Tutuq belgisi with right curly apostrophe ʼ (U+2019)
+  // Between letters (except O/G handled above): maʼlumot, sanʼat, masʼul, taʼminlash, etc.
+  res = res.replace(/([a-zA-Z\u0400-\u04FF])['`ʻʻʼ´]([a-zA-Z\u0400-\u04FF])/g, (m, p1, p2) => {
+    if (/^[og]$/i.test(p1)) return p1 + 'ʻ' + p2;
+    return p1 + 'ʼ' + p2;
   });
 
   return res;
@@ -67,15 +67,15 @@ export default async function handler(req, res) {
         [ { text: '🏁 Loyihani topshirish', callback_data: 'status_finished' }, { text: '❌ Bekor qilish', callback_data: 'status_rejected' } ]
       ];
     } else if (data === 'status_finished') {
-      alertText = '🏁 Loyiha tugatildi, to‘lov kutilmoqda!';
+      alertText = '🏁 Loyiha tugatildi, toʻlov kutilmoqda!';
       newKeyboard = [
-        [ { text: '🟣 HOLAT: YAKUNLANDI (To‘lov kutilmoqda)', callback_data: 'ignore' } ],
-        [ { text: '💵 To‘lov qabul qilindi', callback_data: 'status_paid' } ]
+        [ { text: '🟣 HOLAT: YAKUNLANDI (Toʻlov kutilmoqda)', callback_data: 'ignore' } ],
+        [ { text: '💵 Toʻlov qabul qilindi', callback_data: 'status_paid' } ]
       ];
     } else if (data === 'status_paid') {
-      alertText = '🏆 To‘lov olindi. Tabriklaymiz!';
+      alertText = '🏆 Toʻlov olindi. Tabriklaymiz!';
       newKeyboard = [
-        [ { text: '🏆 HOLAT: TUGATILDI VA TO‘LOV OLINDI!', callback_data: 'ignore' } ]
+        [ { text: '🏆 HOLAT: TUGATILDI VA TOʻLOV OLINDI!', callback_data: 'ignore' } ]
       ];
     } else if (data === 'status_rejected') {
       alertText = '🔴 Bekor qilindi.';
@@ -129,7 +129,7 @@ export default async function handler(req, res) {
     let replyMarkup = null;
 
     if (text === '/start') {
-      replyText = `Salom, janob MrAstronaut! 👨‍🚀\n\nBiz sizning shaxsiy AI yordamchingiz va CRM boshqaruv markazingiz bo‘lamiz. Nima xizmat?`;
+      replyText = `Salom, janob MrAstronaut! 👨‍🚀\n\nBiz sizning shaxsiy AI yordamchingiz va CRM boshqaruv markazingiz boʻlamiz. Nima xizmat?`;
       replyMarkup = {
         keyboard: [
           [{ text: "💬 AI bilan suhbat" }]
@@ -139,7 +139,7 @@ export default async function handler(req, res) {
       };
     } 
     else if (text === '📊 Statistika') {
-      replyText = "Barcha buyurtmalar to‘g‘ridan-to‘g‘ri Telegram xabarlari orqali xavfsiz boshqariladi.";
+      replyText = "Barcha buyurtmalar toʻgʻridan-toʻgʻri Telegram xabarlari orqali xavfsiz boshqariladi.";
     }
     else {
       // AI Chat
@@ -162,7 +162,7 @@ export default async function handler(req, res) {
             model: 'mercury-2',
             reasoning_effort: 'low',
             messages: [
-              { role: 'system', content: "Siz MrAstronautning shaxsiy yordamchisisiz. Qisqa va aniq o‘zbek tilida javob bering. QAT’IY QOIDA: O‘zbek tili grammatikasi va imlo qoidalariga 100% amal qiling. O‘ va G‘ harflarida har doim to‘g‘ri chapga egilgan apostrof belgisini ishlating (O‘, o‘, G‘, g‘). Ularni oddiy to‘g‘ri tutuq belgisi yoki birikmali tirnoqlar bilan almashtirmang. Tutuq belgisini (’) o‘z o‘rnida va to‘g‘ri shaklda qo‘llang. Matndagi barcha iqtibos va nomlarni standart qo‘shtirnoqlar (“...”) ichida bering. Har bir gap va so‘z grammatik jihatdan benuqson bo‘lsin." },
+              { role: 'system', content: "Siz MrAstronautning shaxsiy yordamchisisiz. Qisqa va aniq oʻzbek tilida javob bering. QATʼIY QOIDA: Oʻzbek tili grammatikasi va imlo qoidalariga 100% amal qiling. Oʻ va Gʻ harflarida har doim toʻgʻri chapga egilgan apostrof belgisini ishlating (Oʻ, oʻ, Gʻ, gʻ). Ularni oddiy toʻgʻri tutuq belgisi yoki birikmali tirnoqlar bilan almashtirmang. Tutuq belgisini (ʼ) oʻz oʻrnida va toʻgʻri shaklda qoʻllang. Matndagi barcha iqtibos va nomlarni standart qoʻshtirnoqlar (“...”) ichida bering. Har bir gap va soʻz grammatik jihatdan benuqson boʻlsin." },
               { role: 'user', content: text }
             ]
           })
