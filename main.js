@@ -562,7 +562,9 @@ if (dd) {
   });
 }
 
-/* ── SUCCESS 3D ROCKET LAUNCH ANIMATION ────────────────── */
+/* ── SUCCESS 3D ROCKET LAUNCH ANIMATION (GROUND LIFTOFF) ── */
+
+/* ── SUCCESS 3D ROCKET LAUNCH ANIMATION (FROM EARTH) ── */
 function showSuccess3DAnimation(messageText) {
   if (typeof THREE === 'undefined') {
     const script = document.createElement('script');
@@ -598,7 +600,7 @@ function initRocketLaunchAnimation(messageText) {
 
   const textContainer = document.createElement('div');
   Object.assign(textContainer.style, {
-    position: 'absolute', zIndex: '2', bottom: '15%', left: '50%',
+    position: 'absolute', zIndex: '2', bottom: '12%', left: '50%',
     transform: 'translateX(-50%) translateY(40px)', opacity: '0',
     color: '#fff', fontFamily: '"Space Grotesk", var(--sans), sans-serif',
     textAlign: 'center', transition: 'all 1.2s cubic-bezier(0.16, 1, 0.3, 1)',
@@ -610,12 +612,12 @@ function initRocketLaunchAnimation(messageText) {
   const subText = curT['toast_success_sub'] || 'Buyurtma qabul qilindi';
 
   textContainer.innerHTML = `
-    <div style="font-size: clamp(24px, 4.5vw, 36px); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; background: linear-gradient(135deg, #ffffff 0%, #c084fc 50%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0px 8px 24px rgba(192,132,252,0.35);">
+    <div style="font-size: clamp(22px, 4vw, 34px); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; background: linear-gradient(135deg, #ffffff 0%, #c084fc 50%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0px 8px 24px rgba(192,132,252,0.35);">
       ${messageText}
     </div>
-    <div style="margin-top: 14px; font-size: clamp(13px, 1.8vw, 15px); color: #94a3b8; letter-spacing: 1.5px; font-weight: 400; display: inline-flex; align-items: center; justify-content: center; gap: 10px; background: rgba(255,255,255,0.04); padding: 8px 18px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(12px);">
+    <div style="margin-top: 12px; font-size: clamp(12px, 1.6vw, 14.5px); color: #94a3b8; letter-spacing: 1.5px; font-weight: 400; display: inline-flex; align-items: center; justify-content: center; gap: 10px; background: rgba(255,255,255,0.04); padding: 8px 20px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(12px);">
       <span style="display:inline-block; width: 8px; height: 8px; background: #38bdf8; border-radius: 50%; box-shadow: 0 0 12px 3px #38bdf8; animation: rocketPulse 1.5s infinite;"></span>
-      <span>${subText} · Loyiha start oldi 🚀</span>
+      <span>${subText} · Yer sharidan start berildi 🚀</span>
     </div>
     <style>@keyframes rocketPulse { 0%, 100% { opacity: 0.6; transform: scale(1); } 50% { opacity: 1; transform: scale(1.4); } }</style>
   `;
@@ -626,7 +628,7 @@ function initRocketLaunchAnimation(messageText) {
 
   // THREE.JS SETUP
   const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x05050a, 0.0015);
+  scene.fog = new THREE.FogExp2(0x05050a, 0.0012);
   
   const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
   camera.position.set(0, 0, 32);
@@ -636,18 +638,50 @@ function initRocketLaunchAnimation(messageText) {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   canvasContainer.appendChild(renderer.domElement);
 
-  // ROCKET GROUP
-  const rocketGroup = new THREE.Group();
-  rocketGroup.position.set(0, -28, 0);
-  rocketGroup.scale.set(0.1, 0.1, 0.1);
-  
   const textureLoader = new THREE.TextureLoader();
+
+  // 1. NEON EARTH GLOBE (At the bottom of the screen)
+  const earthGroup = new THREE.Group();
+  earthGroup.position.set(0, -17, 0);
+
+  const earthTexture = textureLoader.load('assets/neon-earth.png');
+  earthTexture.generateMipmaps = true;
+  earthTexture.minFilter = THREE.LinearMipmapLinearFilter;
+
+  const earthGeo = new THREE.PlaneGeometry(24, 24);
+  const earthMat = new THREE.MeshBasicMaterial({
+    map: earthTexture,
+    transparent: true,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  });
+  const earthMesh = new THREE.Mesh(earthGeo, earthMat);
+  earthGroup.add(earthMesh);
+
+  // Atmospheric cyan halo ring around Earth
+  const earthHaloGeo = new THREE.RingGeometry(11.8, 14.5, 64);
+  const earthHaloMat = new THREE.MeshBasicMaterial({
+    color: 0x38bdf8,
+    transparent: true,
+    opacity: 0.3,
+    blending: THREE.AdditiveBlending,
+    side: THREE.DoubleSide
+  });
+  const earthHalo = new THREE.Mesh(earthHaloGeo, earthHaloMat);
+  earthGroup.add(earthHalo);
+
+  scene.add(earthGroup);
+
+  // 2. ROCKET GROUP (Launches from Earth)
+  const rocketGroup = new THREE.Group();
+  rocketGroup.position.set(0, -6.5, 3); // Positioned directly on Earth's top horizon
+  rocketGroup.scale.set(0.65, 0.65, 0.65);
+  
   const rocketTexture = textureLoader.load('assets/neon-rocket.png');
   rocketTexture.generateMipmaps = true;
   rocketTexture.minFilter = THREE.LinearMipmapLinearFilter;
 
-  // Rocket Mesh (Sleek aspect ratio 1:1 plane)
-  const rocketGeo = new THREE.PlaneGeometry(16, 16);
+  const rocketGeo = new THREE.PlaneGeometry(14, 14);
   const rocketMat = new THREE.MeshBasicMaterial({
     map: rocketTexture,
     transparent: true,
@@ -657,11 +691,11 @@ function initRocketLaunchAnimation(messageText) {
   const rocketMesh = new THREE.Mesh(rocketGeo, rocketMat);
   rocketGroup.add(rocketMesh);
 
-  // Glowing Telemetry Rings (Purple and Cyan - matching the site brand)
+  // Glowing Telemetry Rings (Purple and Cyan)
   const ringMat1 = new THREE.MeshBasicMaterial({
     color: 0xa855f7, transparent: true, opacity: 0.65, blending: THREE.AdditiveBlending
   });
-  const ringGeo1 = new THREE.TorusGeometry(8.5, 0.08, 16, 80);
+  const ringGeo1 = new THREE.TorusGeometry(7.2, 0.07, 16, 80);
   const ring1 = new THREE.Mesh(ringGeo1, ringMat1);
   ring1.rotation.x = Math.PI / 2.3;
   rocketGroup.add(ring1);
@@ -669,36 +703,35 @@ function initRocketLaunchAnimation(messageText) {
   const ringMat2 = new THREE.MeshBasicMaterial({
     color: 0x38bdf8, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending
   });
-  const ringGeo2 = new THREE.TorusGeometry(10.5, 0.05, 16, 80);
+  const ringGeo2 = new THREE.TorusGeometry(8.8, 0.05, 16, 80);
   const ring2 = new THREE.Mesh(ringGeo2, ringMat2);
   ring2.rotation.x = -Math.PI / 2.6;
   rocketGroup.add(ring2);
 
   scene.add(rocketGroup);
 
-  // THRUSTER EXHAUST PARTICLES (Streaming downwards from the engine)
-  const exhaustCount = 400;
+  // 3. THRUSTER EXHAUST PARTICLES (Blasting downwards onto Earth)
+  const exhaustCount = 450;
   const exhaustGeo = new THREE.BufferGeometry();
   const exhaustPos = new Float32Array(exhaustCount * 3);
   const exhaustColors = new Float32Array(exhaustCount * 3);
   const exhaustVels = [];
 
   for (let i = 0; i < exhaustCount; i++) {
-    exhaustPos[i * 3] = (Math.random() - 0.5) * 1.5;
-    exhaustPos[i * 3 + 1] = -6 - Math.random() * 8;
-    exhaustPos[i * 3 + 2] = (Math.random() - 0.5) * 1.5;
+    exhaustPos[i * 3] = (Math.random() - 0.5) * 1.4;
+    exhaustPos[i * 3 + 1] = -5.2 - Math.random() * 6;
+    exhaustPos[i * 3 + 2] = (Math.random() - 0.5) * 1.4;
 
-    // Cyan / Electric Blue / Neon Purple engine colors
-    const isCyan = Math.random() > 0.3;
-    exhaustColors[i * 3] = isCyan ? 0.2 : 0.7;
-    exhaustColors[i * 3 + 1] = isCyan ? 0.8 : 0.3;
+    const isCyan = Math.random() > 0.25;
+    exhaustColors[i * 3] = isCyan ? 0.2 : 0.75;
+    exhaustColors[i * 3 + 1] = isCyan ? 0.85 : 0.35;
     exhaustColors[i * 3 + 2] = 1.0;
 
     exhaustVels.push({
       vx: (Math.random() - 0.5) * 0.35,
-      vy: -(Math.random() * 1.2 + 0.8),
+      vy: -(Math.random() * 1.3 + 0.8),
       vz: (Math.random() - 0.5) * 0.35,
-      life: Math.random() * 40
+      life: Math.random() * 35
     });
   }
 
@@ -706,7 +739,7 @@ function initRocketLaunchAnimation(messageText) {
   exhaustGeo.setAttribute('color', new THREE.BufferAttribute(exhaustColors, 3));
 
   const exhaustMat = new THREE.PointsMaterial({
-    size: 1.2,
+    size: 1.3,
     vertexColors: true,
     transparent: true,
     opacity: 0.9,
@@ -716,20 +749,20 @@ function initRocketLaunchAnimation(messageText) {
   const exhaustMesh = new THREE.Points(exhaustGeo, exhaustMat);
   rocketGroup.add(exhaustMesh);
 
-  // VERTICAL WARP SPEED STARFIELD (2000 stars racing downwards)
-  const starsCount = 2000;
+  // 4. VERTICAL WARP SPEED STARFIELD
+  const starsCount = 2200;
   const starsGeo = new THREE.BufferGeometry();
   const starsPos = new Float32Array(starsCount * 3);
   const starsColors = new Float32Array(starsCount * 3);
 
   for (let i = 0; i < starsCount * 3; i += 3) {
-    starsPos[i] = (Math.random() - 0.5) * 160;
-    starsPos[i + 1] = (Math.random() - 0.5) * 180;
+    starsPos[i] = (Math.random() - 0.5) * 170;
+    starsPos[i + 1] = (Math.random() - 0.5) * 190;
     starsPos[i + 2] = (Math.random() - 0.5) * 200 - 30;
 
     const rnd = Math.random();
     starsColors[i] = rnd > 0.5 ? 0.8 : 0.4;
-    starsColors[i + 1] = rnd > 0.5 ? 0.6 : 0.8;
+    starsColors[i + 1] = rnd > 0.5 ? 0.6 : 0.85;
     starsColors[i + 2] = 1.0;
   }
 
@@ -747,15 +780,15 @@ function initRocketLaunchAnimation(messageText) {
   const starsMesh = new THREE.Points(starsGeo, starsMat);
   scene.add(starsMesh);
 
-  // INTERACTIVE MOUSE / GYRO TILT
+  // INTERACTIVE TILT
   let mouseX = 0, mouseY = 0;
   let targetTiltX = 0, targetTiltY = 0;
 
   const onMouseMove = (e) => {
     mouseX = (e.clientX - window.innerWidth / 2) / (window.innerWidth / 2);
     mouseY = (e.clientY - window.innerHeight / 2) / (window.innerHeight / 2);
-    targetTiltY = mouseX * 0.3;
-    targetTiltX = -mouseY * 0.2;
+    targetTiltY = mouseX * 0.25;
+    targetTiltX = -mouseY * 0.18;
   };
   window.addEventListener('mousemove', onMouseMove);
 
@@ -763,8 +796,8 @@ function initRocketLaunchAnimation(messageText) {
     if (e.touches.length > 0) {
       mouseX = (e.touches[0].clientX - window.innerWidth / 2) / (window.innerWidth / 2);
       mouseY = (e.touches[0].clientY - window.innerHeight / 2) / (window.innerHeight / 2);
-      targetTiltY = mouseX * 0.3;
-      targetTiltX = -mouseY * 0.2;
+      targetTiltY = mouseX * 0.25;
+      targetTiltX = -mouseY * 0.18;
     }
   };
   window.addEventListener('touchmove', onTouchMove, { passive: true });
@@ -787,59 +820,68 @@ function initRocketLaunchAnimation(messageText) {
 
     const elapsed = Date.now() - startTime;
 
-    // 1. STARFIELD SPEED (Accelerates to warp speed)
+    // 1. STARFIELD DOWNWARD WARP
     const starPositions = starsGeo.attributes.position.array;
-    let warpSpeed = Math.min(3.5, 0.4 + (elapsed * 0.0007));
-
-    // At final stage (boost away), hyperspace accelerates
+    let warpSpeed = Math.min(3.2, 0.4 + (elapsed * 0.0006));
     if (elapsed > 4500) {
       warpSpeed += (elapsed - 4500) * 0.015;
     }
 
     for (let i = 1; i < starsCount * 3; i += 3) {
       starPositions[i] -= warpSpeed;
-      if (starPositions[i] < -90) {
-        starPositions[i] += 180;
+      if (starPositions[i] < -95) {
+        starPositions[i] += 190;
       }
     }
     starsGeo.attributes.position.needsUpdate = true;
 
-    // 2. ROCKET LIFTOFF & FLIGHT TRAJECTORY
-    if (elapsed < 1400) {
-      // Phase 1: Rapid Ascent to Center
-      const t = Math.min(1, elapsed / 1400);
-      const easeOut = 1 - Math.pow(1 - t, 3);
-      rocketGroup.position.y = -28 + easeOut * 28;
-      const curScale = 0.1 + easeOut * 1.15;
-      rocketGroup.scale.set(curScale, curScale, curScale);
-    } else if (elapsed < 4500) {
-      // Phase 2: Steady Cruise & Subtle Hover Oscillation
-      const cruiseElapsed = elapsed - 1400;
-      const hoverY = Math.sin(cruiseElapsed * 0.003) * 0.8;
-      rocketGroup.position.y = 0 + hoverY;
-      rocketGroup.scale.set(1.25, 1.25, 1.25);
+    // 2. EARTH ROTATION & RECEDING DYNAMICS
+    earthMesh.rotation.z -= 0.0018;
+    earthHalo.rotation.z += 0.001;
 
-      // Smooth reveal of success HUD
+    // 3. ROCKET LIFTOFF FROM EARTH
+    if (elapsed < 1800) {
+      // Liftoff Phase: Rocket powers up from Earth's curve to center
+      const t = Math.min(1, elapsed / 1800);
+      const easeOut = 1 - Math.pow(1 - t, 3);
+      
+      // Rocket rises from -6.5 to +1.5
+      rocketGroup.position.y = -6.5 + easeOut * 8.0;
+      const curScale = 0.65 + easeOut * 0.45;
+      rocketGroup.scale.set(curScale, curScale, curScale);
+
+      // Earth gently descends as camera follows rocket into orbit
+      earthGroup.position.y = -17 - (easeOut * 4.5);
+    } else if (elapsed < 4500) {
+      // Orbital Cruise Phase: Hover and display HUD
+      const cruiseElapsed = elapsed - 1800;
+      const hoverY = Math.sin(cruiseElapsed * 0.003) * 0.7;
+      rocketGroup.position.y = 1.5 + hoverY;
+      rocketGroup.scale.set(1.1, 1.1, 1.1);
+
+      earthGroup.position.y = -21.5 + Math.sin(cruiseElapsed * 0.0015) * 0.3;
+
       textContainer.style.opacity = '1';
       textContainer.style.transform = 'translateX(-50%) translateY(0)';
     } else {
-      // Phase 3: Final Hyperspace Boost Out of Frame
+      // Hyperspace Escape Phase: Rocket accelerates out of screen
       const boostElapsed = elapsed - 4500;
       const boostY = Math.pow(boostElapsed * 0.02, 2.2);
-      rocketGroup.position.y += boostY * 0.15;
-      rocketGroup.scale.y += 0.025; // Warp stretch!
+      rocketGroup.position.y += boostY * 0.16;
+      rocketGroup.scale.y += 0.022; // Warp elongation effect
+      earthGroup.position.y -= boostY * 0.04;
     }
 
-    // Aerodynamic tilt & user interaction
+    // Aerodynamic tilt
     rocketGroup.rotation.y += (targetTiltY - rocketGroup.rotation.y) * 0.08;
     rocketGroup.rotation.x += (targetTiltX - rocketGroup.rotation.x) * 0.08;
-    rocketGroup.rotation.z = -targetTiltY * 0.5 + Math.sin(elapsed * 0.004) * 0.03;
+    rocketGroup.rotation.z = -targetTiltY * 0.45 + Math.sin(elapsed * 0.004) * 0.025;
 
-    // Telemetry rings rotation
+    // Telemetry rings
     ring1.rotation.z += 0.025;
     ring2.rotation.z -= 0.018;
 
-    // 3. THRUSTER EXHAUST PARTICLES PHYSICS
+    // 4. THRUSTER EXHAUST PARTICLES
     const exPos = exhaustGeo.attributes.position.array;
     for (let i = 0; i < exhaustCount; i++) {
       const idx = i * 3;
@@ -850,11 +892,10 @@ function initRocketLaunchAnimation(messageText) {
       exPos[idx + 2] += vel.vz;
       vel.life++;
 
-      // Respawn particle at thruster nozzle
-      if (vel.life > 35 || exPos[idx + 1] < -20) {
-        exPos[idx] = (Math.random() - 0.5) * 1.2;
-        exPos[idx + 1] = -5.8;
-        exPos[idx + 2] = (Math.random() - 0.5) * 1.2;
+      if (vel.life > 32 || exPos[idx + 1] < -20) {
+        exPos[idx] = (Math.random() - 0.5) * 1.1;
+        exPos[idx + 1] = -5.0;
+        exPos[idx + 2] = (Math.random() - 0.5) * 1.1;
         vel.vy = -(Math.random() * 1.4 + 0.9);
         vel.life = 0;
       }
@@ -881,6 +922,11 @@ function initRocketLaunchAnimation(messageText) {
     rocketGeo.dispose();
     rocketMat.dispose();
     if (rocketTexture) rocketTexture.dispose();
+    earthGeo.dispose();
+    earthMat.dispose();
+    earthHaloGeo.dispose();
+    earthHaloMat.dispose();
+    if (earthTexture) earthTexture.dispose();
     ringGeo1.dispose();
     ringMat1.dispose();
     ringGeo2.dispose();
