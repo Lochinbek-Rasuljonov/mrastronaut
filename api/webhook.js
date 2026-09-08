@@ -1,5 +1,3 @@
-import Redis from 'ioredis';
-
 export function normalizeUzbekOrthography(text) {
   if (!text) return text;
   // 1. Convert paired quotation marks: "..." and «...» to standard “...” (U+201C / U+201D)
@@ -32,31 +30,12 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, INCEPTION_API_KEY, REDIS_URL } = process.env;
+  const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN ? process.env.TELEGRAM_BOT_TOKEN.trim() : '';
+  const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID ? process.env.TELEGRAM_CHAT_ID.trim() : '';
+  const INCEPTION_API_KEY = (process.env.INCEPTION_API_KEY || '***REMOVED***').trim();
 
   if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
     return res.status(500).json({ error: 'Config missing' });
-  }
-
-  // Lazy Redis connection
-  let _redis = null;
-  async function getRedis() {
-    if (_redis) return _redis;
-    if (!REDIS_URL) return null;
-    try {
-      const urlObj = new URL(REDIS_URL);
-      _redis = new Redis(REDIS_URL, {
-        tls: { servername: urlObj.hostname },
-        connectTimeout: 5000,
-        commandTimeout: 3000,
-        maxRetriesPerRequest: 1
-      });
-      _redis.on('error', (err) => console.error('Redis Error:', err));
-      return _redis;
-    } catch(e) {
-      console.error('Redis connection error:', e);
-      return null;
-    }
   }
 
   const body = req.body;
@@ -74,7 +53,6 @@ export default async function handler(req, res) {
     const data = cb.data;
     let newKeyboard = [];
     let alertText = '';
-    const redis = await getRedis();
 
     if (data === 'status_accepted') {
       alertText = '✅ Loyiha qabul qilindi!';
@@ -82,7 +60,6 @@ export default async function handler(req, res) {
         [ { text: '🟢 HOLAT: QABUL QILINDI (Kutilmoqda)', callback_data: 'ignore' } ],
         [ { text: '🚀 Ishni boshlash', callback_data: 'status_started' }, { text: '❌ Bekor qilish', callback_data: 'status_rejected' } ]
       ];
-      if (redis) await redis.incr('stats_accepted').catch(()=>null);
     } else if (data === 'status_started') {
       alertText = '🚀 Ish boshlandi!';
       newKeyboard = [
@@ -100,25 +77,12 @@ export default async function handler(req, res) {
       newKeyboard = [
         [ { text: '🏆 HOLAT: TUGATILDI VA TO‘LOV OLINDI!', callback_data: 'ignore' } ]
       ];
-      if (redis) {
-        await redis.incr('stats_completed').catch(()=>null);
-        const msgText = cb.message.text || '';
-        const budgetMatch = msgText.match(/Byudjet:\s*([0-9\.\,]+)/);
-        if (budgetMatch && budgetMatch[1]) {
-          const amount = parseInt(budgetMatch[1].replace(/[^0-9]/g, ''));
-          if (!isNaN(amount) && amount > 0) {
-            await redis.incrby('stats_profit', amount).catch(()=>null);
-          }
-        }
-      }
     } else if (data === 'status_rejected') {
       alertText = '🔴 Bekor qilindi.';
       newKeyboard = [
         [ { text: '🔴 HOLAT: RAD ETILDI / BEKOR QILINDI', callback_data: 'ignore' } ]
       ];
-      if (redis) await redis.incr('stats_rejected').catch(()=>null);
     } else if (data === 'ignore') {
-      if (redis) redis.quit();
       return res.status(200).json({ ok: true });
     }
 
@@ -147,8 +111,7 @@ export default async function handler(req, res) {
         body: JSON.stringify({ callback_query_id: cb.id, text: alertText, show_alert: false })
       });
     } catch (err) { console.error(err); }
-    
-    if (redis) redis.quit();
+
     return res.status(200).json({ ok: true });
   }
 
@@ -169,33 +132,14 @@ export default async function handler(req, res) {
       replyText = `Salom, janob MrAstronaut! 👨‍🚀\n\nBiz sizning shaxsiy AI yordamchingiz va CRM boshqaruv markazingiz bo‘lamiz. Nima xizmat?`;
       replyMarkup = {
         keyboard: [
-          [{ text: "📊 Statistika" }, { text: "💬 AI bilan suhbat" }]
+          [{ text: "💬 AI bilan suhbat" }]
         ],
         resize_keyboard: true,
         persistent: true
       };
     } 
     else if (text === '📊 Statistika') {
-      const redis = await getRedis();
-      if (!redis) {
-        replyText = "📊 Hozircha ma’lumotlar bazasi (DB) ulanmagan. REDIS_URL kiritilishi bilan statistika shu yerda ko‘rsatiladi!";
-      } else {
-        try {
-          const accepted = (await redis.get('stats_accepted')) || 0;
-          const completed = (await redis.get('stats_completed')) || 0;
-          const rejected = (await redis.get('stats_rejected')) || 0;
-          const profit = (await redis.get('stats_profit')) || 0;
-          
-          replyText = `📊 <b>Sizning shaxsiy statistikangiz:</b>\n\n` +
-                      `✅ Qabul qilingan loyihalar: <b>${accepted} ta</b>\n` +
-                      `🏆 Muvaffaqiyatli yakunlangan: <b>${completed} ta</b>\n` +
-                      `🔴 Rad etilganlar: <b>${rejected} ta</b>\n\n` +
-                      `💰 Umumiy sof foyda: <b>$${profit}</b>`;
-        } catch (err) {
-          replyText = "Bazaga ulanishda xatolik yuz berdi. Iltimos, keyinroq urining (baza uyquda bo‘lishi mumkin).";
-        }
-      }
-      if (redis) redis.quit();
+      replyText = "Barcha buyurtmalar to‘g‘ridan-to‘g‘ri Telegram xabarlari orqali xavfsiz boshqariladi.";
     }
     else {
       // AI Chat

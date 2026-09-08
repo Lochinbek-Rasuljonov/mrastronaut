@@ -214,12 +214,15 @@ const btn=document.getElementById('submitBtn');
 
 let toastTimer=null;
 
-function showToast(isSuccess=true){
+function showToast(isSuccess=true, customMsg=null, actionUrl=null){
   if(!toast)return;
   const curLang=document.querySelector('.lang-btn.active')?.dataset.lang||'uz';
   const curT=(typeof T!=='undefined'&&T[curLang])||{};
   const iconEl=toast.querySelector('.toast-icon')||toast.querySelector('span:first-child');
   const textEl=toast.querySelector('.toast-text')||toast.querySelector('span:last-child');
+
+  const oldAction = toast.querySelector('.toast-action-btn');
+  if(oldAction) oldAction.remove();
 
   if(isSuccess){
     toast.classList.remove('is-error');
@@ -233,35 +236,97 @@ function showToast(isSuccess=true){
     if(iconEl)iconEl.innerHTML='<i class="fa-solid fa-circle-exclamation"></i>';
     if(textEl){
       textEl.dataset.key='toast_err';
-      textEl.textContent=curT['toast_err']||(typeof T!=='undefined'&&T.uz&&T.uz['toast_err'])||'Xatolik yuz berdi. Iltimos, qayta urinib ko‘ring yoki to‘g‘ridan-to‘g‘ri Telegram orqali yozing.';
+      textEl.textContent=customMsg || curT['toast_err']||(typeof T!=='undefined'&&T.uz&&T.uz['toast_err'])||'Xatolik yuz berdi. Iltimos, qayta urinib ko‘ring yoki to‘g‘ridan-to‘g‘ri Telegram orqali yozing.';
+    }
+    if(actionUrl){
+      const actBtn = document.createElement('a');
+      actBtn.className = 'toast-action-btn';
+      actBtn.href = actionUrl;
+      actBtn.target = '_blank';
+      actBtn.rel = 'noopener noreferrer';
+      actBtn.setAttribute('aria-label', 'Telegram orqali to‘g‘ridan-to‘g‘ri yozish');
+      actBtn.innerHTML = '<i class="fa-brands fa-telegram"></i> <span>Telegram</span>';
+      toast.appendChild(actBtn);
     }
   }
 
   toast.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>toast.classList.remove('show'),4500);
+  toastTimer=setTimeout(()=>toast.classList.remove('show'), actionUrl ? 10000 : 4500);
 }
 window.showToast = showToast;
 function validate(){
   let ok=true;
   ['f-name','f-contact','f-service','f-budget','f-msg'].forEach(id=>{
     const inp=document.getElementById(id);
+    if(!inp) return;
     const field=inp.closest('.field');
-    let isValid = inp.value.trim() !== '';
-    if (id === 'f-msg' && inp.value.trim().length < 20) {
+    const val = inp.value.trim();
+    let isValid = val !== '';
+    if (id === 'f-service') {
+      const ddSel = document.querySelector('#service-dropdown .dropdown-selected');
+      const curLang = document.querySelector('.lang-btn.active')?.dataset.lang || 'uz';
+      const placeholderText = ddSel ? ((typeof T !== 'undefined' && T[curLang] && T[curLang]['f_sel']) || 'Xizmat turini tanlang...') : '';
+      const invalidPlaceholders = [
+        placeholderText.toLowerCase(),
+        'tanlanmadi',
+        'xizmat turini tanlang...',
+        'хизмат турини танланг...',
+        'выберите услугу...',
+        'select a service...'
+      ];
+      if (!val || invalidPlaceholders.includes(val.toLowerCase())) {
+        isValid = false;
+      }
+    }
+    if (id === 'f-msg' && val.length < 20) {
       isValid = false;
     }
-    if(!isValid){field.classList.add('has-error');ok=false;}
-    else field.classList.remove('has-error');
+    if(!isValid){
+      field.classList.add('has-error');
+      ok=false;
+    } else {
+      field.classList.remove('has-error');
+    }
   });
   return ok;
 }
 if(form){
-  ['f-name','f-contact','f-service','f-budget','f-msg'].forEach(id=>{
-    document.getElementById(id)?.addEventListener('input',function(){
-      if(this.value.trim())this.closest('.field').classList.remove('has-error');
+  ['f-name','f-contact','f-budget','f-msg'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.addEventListener('input',function(){
+      const val = this.value.trim();
+      let valid = val !== '';
+      if(id === 'f-msg') valid = val.length >= 20;
+      if(valid) this.closest('.field').classList.remove('has-error');
+    });
+    el.addEventListener('blur',function(){
+      const val = this.value.trim();
+      let valid = val !== '';
+      if(id === 'f-msg') valid = val.length >= 20;
+      if(!valid) this.closest('.field').classList.add('has-error');
     });
   });
+
+  const ddContainer = document.getElementById('service-dropdown');
+  if (ddContainer) {
+    ddContainer.addEventListener('focusout', function(e) {
+      setTimeout(() => {
+        if (!ddContainer.contains(document.activeElement)) {
+          const hid = document.getElementById('f-service');
+          const val = (hid?.value || '').trim();
+          const curLang = document.querySelector('.lang-btn.active')?.dataset.lang || 'uz';
+          const placeholder = (typeof T !== 'undefined' && T[curLang] && T[curLang]['f_sel']) || 'Xizmat turini tanlang...';
+          const isInvalid = !val || val === 'Tanlanmadi' || val.toLowerCase() === placeholder.toLowerCase();
+          if (isInvalid) {
+            ddContainer.closest('.field')?.classList.add('has-error');
+          }
+        }
+      }, 50);
+    });
+  }
+
   form.addEventListener('submit', async e => {
     e.preventDefault();
     if(!validate()) return;
@@ -274,20 +339,26 @@ if(form){
       btnSpan.textContent = curT['f_sending'] || (typeof T !== 'undefined' && T.uz && T.uz['f_sending']) || 'Yuborilmoqda...';
     }
     
-    const name = document.getElementById('f-name').value;
-    const contact = document.getElementById('f-contact').value;
-    const service = document.getElementById('f-service').value || 'Tanlanmadi';
-    const budget = document.getElementById('f-budget') ? document.getElementById('f-budget').value : '';
-    const msg = document.getElementById('f-msg').value;
-    
-    function escapeHtml(str) {
-      return (str || '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-    }
+    const name = document.getElementById('f-name').value.trim();
+    const contact = document.getElementById('f-contact').value.trim();
+    const service = document.getElementById('f-service').value.trim() || 'Tanlanmadi';
+    const budget = (document.getElementById('f-budget')?.value || '').trim();
+    const msg = document.getElementById('f-msg').value.trim();
+
+    // Prepare direct Telegram fallback URL in case backend is protected by Vercel SSO or unavailable
+    const tgPrefill = encodeURIComponent(
+      `Assalomu alaykum!\n\n` +
+      `Ism: ${name}\n` +
+      `Aloqa: ${contact}\n` +
+      `Xizmat: ${service}\n` +
+      `Byudjet: ${budget}\n\n` +
+      `Loyiha haqida:\n${msg}`
+    );
+    const fallbackTgUrl = `https://t.me/REDACTED?text=${tgPrefill}`;
 
     let isOk = false;
+    let customErrorMsg = '';
+
     try {
       const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
       const timeoutId = controller ? setTimeout(() => controller.abort(), 15000) : null;
@@ -298,9 +369,46 @@ if(form){
         signal: controller ? controller.signal : undefined
       });
       if (timeoutId) clearTimeout(timeoutId);
-      isOk = resp.ok;
+
+      const ct = resp.headers.get('content-type') || '';
+
+      if (resp.redirected) {
+        customErrorMsg = 'Vercel Deployment Protection (SSO) faol. Iltimos, Telegram orqali yuboring.';
+        isOk = false;
+      } else if (resp.status === 401 || resp.status === 403) {
+        customErrorMsg = 'Ruxsat berilmagan (Vercel himoyasi faol). Iltimos, Telegram orqali yuboring.';
+        isOk = false;
+      } else if (resp.ok) {
+        if (ct.includes('application/json')) {
+          const data = await resp.json().catch(() => null);
+          if (data && data.success) {
+            isOk = true;
+          } else {
+            isOk = false;
+            customErrorMsg = data?.error || 'Serverda kutilmagan xatolik yuz berdi.';
+          }
+        } else {
+          customErrorMsg = 'Serverdan kutilmagan javob keldi (Vercel SSO yoki xavfsizlik sahifasi). Telegram orqali yuboring.';
+          isOk = false;
+        }
+      } else {
+        if (ct.includes('application/json')) {
+          const errData = await resp.json().catch(() => null);
+          customErrorMsg = errData?.error || 'Server xatosi yuz berdi.';
+        } else if (ct.includes('text/html')) {
+          customErrorMsg = 'Server javob bermadi (Vercel SSO yoki noto‘g‘ri marshrut). Telegram orqali yuboring.';
+        } else {
+          customErrorMsg = `Xatolik yuz berdi (Status: ${resp.status}). Telegram orqali yuboring.`;
+        }
+        isOk = false;
+      }
     } catch(err) {
       console.error('Telegram dispatch error:', err);
+      if (err.name === 'AbortError') {
+        customErrorMsg = 'So‘rov vaqti tugadi (Timeout). Iltimos, qayta urinib ko‘ring yoki Telegram orqali yozing.';
+      } else {
+        customErrorMsg = 'Tarmoq xatosi yuz berdi. Iltimos, Telegram orqali to‘g‘ridan-to‘g‘ri yozing.';
+      }
       isOk = false;
     }
     
@@ -328,7 +436,10 @@ if(form){
       }
       showToast(true);
     } else {
-      showToast(false);
+      if (!customErrorMsg) {
+        customErrorMsg = curT['toast_err'] || (typeof T !== 'undefined' && T.uz && T.uz['toast_err']) || 'Xatolik yuz berdi. Iltimos, qayta urinib ko‘ring yoki to‘g‘ridan-to‘g‘ri Telegram orqali yozing.';
+      }
+      showToast(false, customErrorMsg, fallbackTgUrl);
     }
   });
 }
@@ -353,7 +464,10 @@ const bgVideo = document.querySelector('.bg-video');
 if (bgVideo) {
   const ensurePlay = () => {
     if (bgVideo.paused) {
-      bgVideo.play().catch(() => {});
+      const p = bgVideo.play();
+      if (p && typeof p.catch === 'function') {
+        p.catch(() => {});
+      }
     }
   };
   ensurePlay();
@@ -362,6 +476,10 @@ if (bgVideo) {
   });
   window.addEventListener('focus', ensurePlay);
   document.addEventListener('touchstart', ensurePlay, { once: true, passive: true });
+  bgVideo.addEventListener('ended', () => {
+    bgVideo.currentTime = 0;
+    ensurePlay();
+  });
 }
 
 })();

@@ -30,40 +30,81 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID } = process.env;
-  const INCEPTION_API_KEY = process.env.INCEPTION_API_KEY || '***REMOVED***';
+  const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN ? process.env.TELEGRAM_BOT_TOKEN.trim() : '';
+  const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID ? process.env.TELEGRAM_CHAT_ID.trim() : '';
+  const INCEPTION_API_KEY = (process.env.INCEPTION_API_KEY || '***REMOVED***').trim();
 
   if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
-    return res.status(500).json({ error: 'Server configuration missing' });
+    return res.status(500).json({ error: 'Server sozlamalari mavjud emas: TELEGRAM_BOT_TOKEN yoki TELEGRAM_CHAT_ID sozlanmagan.' });
   }
 
-  const { name, contact, service, budget, message } = req.body;
+  const { name, contact, service, budget, message } = req.body || {};
 
-  if (!name || !contact) {
-    return res.status(400).json({ error: 'Name and contact are required' });
+  if (!name || !name.trim()) {
+    return res.status(400).json({ error: 'Ism kiritilishi shart' });
+  }
+  if (!contact || !contact.trim()) {
+    return res.status(400).json({ error: 'Telegram aloqa ma’lumoti kiritilishi shart' });
+  }
+  const invalidServicePlaceholders = [
+    'tanlanmadi',
+    'xizmat turini tanlang...',
+    'хизмат турини танланг...',
+    'выберите услугу...',
+    'select a service...'
+  ];
+  if (!service || !service.trim() || invalidServicePlaceholders.includes(service.trim().toLowerCase())) {
+    return res.status(400).json({ error: 'Xizmat turi tanlanishi shart' });
+  }
+  if (!budget || !budget.trim()) {
+    return res.status(400).json({ error: 'Taxminiy byudjet kiritilishi shart' });
+  }
+  if (!message || !message.trim()) {
+    return res.status(400).json({ error: 'Loyiha haqida xabar kiritilishi shart' });
+  }
+  if (message.trim().length < 20) {
+    return res.status(400).json({ error: 'Loyiha haqida xabar kamida 20 ta harfdan iborat bo‘lishi kerak' });
   }
 
-  let formattedContact = contact.trim();
-  if (!/^[\d\+\s\-\(\)]+$/.test(formattedContact)) {
-    if (!formattedContact.startsWith('@')) {
-      formattedContact = '@' + formattedContact;
+  const cleanName = name.trim().slice(0, 100);
+  const cleanService = service.trim().slice(0, 100);
+  const cleanBudget = budget.trim().slice(0, 100);
+  const cleanMessage = message.trim().slice(0, 3000);
+
+  // Validate and build contact URL safely to avoid Telegram BUTTON_URL_INVALID errors
+  const rawContact = contact.trim().slice(0, 100);
+  let contactUrl = null;
+  let formattedContact = rawContact;
+
+  const digitsOnly = rawContact.replace(/[^\d]/g, '');
+  if (/^[\d\+\s\-\(\)]+$/.test(rawContact) && digitsOnly.length >= 7 && digitsOnly.length <= 15) {
+    contactUrl = `https://t.me/+${digitsOnly}`;
+    formattedContact = rawContact.startsWith('+') ? rawContact : `+${digitsOnly}`;
+  } else {
+    const usernameMatch = rawContact.replace(/^(?:https?:\/\/)?(?:www\.)?t\.me\//i, '').replace(/^@/, '').trim();
+    if (/^[a-zA-Z0-9_]{4,32}$/.test(usernameMatch)) {
+      contactUrl = `https://t.me/${usernameMatch}`;
+      formattedContact = `@${usernameMatch}`;
     }
   }
 
   // --- AI ANALYSIS ---
-  let aiAnalysis = "<i>AI tahlili mavjud emas.</i>";
+  let aiAnalysis = '<i>AI tahlili mavjud emas.</i>';
   try {
     const aiPrompt = `Siz qobiliyatli IT konsultantsiz. MrAstronaut ismli frilanserga yordam beryapsiz.
 Yangi mijoz quyidagi loyiha so‘rovini yubordi:
-- Xizmat turi: ${service || 'Aytilmadi'}
-- Byudjet: ${budget || 'Aytilmadi'}
-- Mijozning xabari: ${message || 'Aytilmadi'}
+- Xizmat turi: ${cleanService}
+- Byudjet: ${cleanBudget}
+- Mijozning xabari: ${cleanMessage}
 
 Iltimos, ushbu mijoz so‘rovini tahlil qilib, qisqa 3–4 ta band (nuqtachalar) bilan quyidagilarni o‘zbek tilida yozing:
 1. Loyiha uchun qaysi texnologiyalar (Tech Stack) eng mos keladi?
 2. Boshlang‘ich narxni qanday aytish va qanday sotish strategiyasini qo‘llash kerak?
 3. Mijozning xabaridagi asosiy xavf yoki talab nima?
 Faqat aniq faktlar va maslahat bo‘lsin. Hech qanday salomlashishsiz, to‘g‘ridan-to‘g‘ri tahlilni yozing. QAT’IY QOIDA: O‘zbek tili grammatikasi va imlo qoidalariga 100% amal qiling. O‘ va G‘ harflarida har doim to‘g‘ri chapga egilgan apostrof belgisini ishlating (O‘, o‘, G‘, g‘). Ularni oddiy to‘g‘ri tutuq belgisi yoki birikmali tirnoqlar bilan almashtirmang. Tutuq belgisini (’) o‘z o‘rnida va to‘g‘ri shaklda qo‘llang. Matndagi barcha iqtibos va nomlarni standart qo‘shtirnoqlar (“...”) ichida bering. Har bir gap va so‘z grammatik jihatdan benuqson bo‘lsin.`;
+
+    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const timeout = controller ? setTimeout(() => controller.abort(), 4000) : null;
 
     const aiResponse = await fetch('https://api.inceptionlabs.ai/v1/chat/completions', {
       method: 'POST',
@@ -75,8 +116,10 @@ Faqat aniq faktlar va maslahat bo‘lsin. Hech qanday salomlashishsiz, to‘g‘
         model: 'mercury-2',
         reasoning_effort: 'low',
         messages: [{ role: 'user', content: aiPrompt }]
-      })
+      }),
+      signal: controller ? controller.signal : undefined
     });
+    if (timeout) clearTimeout(timeout);
 
     if (aiResponse.ok) {
       const aiData = await aiResponse.json();
@@ -92,13 +135,12 @@ Faqat aniq faktlar va maslahat bo‘lsin. Hech qanday salomlashishsiz, to‘g‘
     console.error('AI call failed', err);
   }
 
-
   // --- BUILD TELEGRAM MESSAGE ---
-  const safeName = normalizeUzbekOrthography(escapeHtml(name));
+  const safeName = normalizeUzbekOrthography(escapeHtml(cleanName));
   const safeContact = escapeHtml(formattedContact);
-  const safeService = normalizeUzbekOrthography(escapeHtml(service || 'Tanlanmadi'));
-  const safeBudget = normalizeUzbekOrthography(escapeHtml(budget || 'Kiritilmadi'));
-  const safeMessage = normalizeUzbekOrthography(escapeHtml(message || 'Kiritilmadi'));
+  const safeService = normalizeUzbekOrthography(escapeHtml(cleanService));
+  const safeBudget = normalizeUzbekOrthography(escapeHtml(cleanBudget));
+  const safeMessage = normalizeUzbekOrthography(escapeHtml(cleanMessage));
 
   const text = `
 🆕 <b>YANGI BUYURTMA</b>
@@ -115,12 +157,14 @@ Faqat aniq faktlar va maslahat bo‘lsin. Hech qanday salomlashishsiz, to‘g‘
 ${aiAnalysis}
   `.trim();
 
-  let cleanContact = formattedContact.replace('@', '');
-  let contactUrl = `https://t.me/${cleanContact}`;
-  if (/^[\d\+\s\-\(\)]+$/.test(formattedContact)) {
-    let phone = formattedContact.replace(/[^\d+]/g, '');
-    contactUrl = `https://t.me/+${phone.replace('+', '')}`;
+  const inlineKeyboard = [];
+  if (contactUrl) {
+    inlineKeyboard.push([ { text: '✉️ Mijozga yozish', url: contactUrl } ]);
   }
+  inlineKeyboard.push([
+    { text: '✅ Qabul qilish', callback_data: 'status_accepted' },
+    { text: '❌ Rad etish', callback_data: 'status_rejected' }
+  ]);
 
   try {
     const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
@@ -131,24 +175,26 @@ ${aiAnalysis}
         text: text,
         parse_mode: 'HTML',
         reply_markup: {
-          inline_keyboard: [
-            [ { text: '✉️ Mijozga yozish', url: contactUrl } ],
-            [
-              { text: '✅ Qabul qilish', callback_data: 'status_accepted' },
-              { text: '❌ Rad etish', callback_data: 'status_rejected' }
-            ]
-          ]
+          inline_keyboard: inlineKeyboard
         }
       })
     });
 
-    const data = await response.json();
-    if (data.ok) {
+    const data = await response.json().catch(() => null);
+    if (data && data.ok) {
       return res.status(200).json({ success: true });
     } else {
-      return res.status(500).json({ error: data.description || 'Telegram API Error' });
+      let desc = data?.description || 'Telegram API xatosi';
+      if (desc.includes('Unauthorized')) {
+        desc = 'Telegram bot tokeni noto‘g‘ri yoki bekor qilingan (Unauthorized).';
+      } else if (desc.includes('chat not found')) {
+        desc = 'Telegram chat topilmadi (Botga avval /start yuborilgan bo‘lishi kerak).';
+      } else if (desc.includes('bot was blocked')) {
+        desc = 'Telegram bot bloklangan. Iltimos, botni blokdan chiqaring.';
+      }
+      return res.status(502).json({ error: desc });
     }
   } catch (error) {
-    return res.status(500).json({ error: 'Failed to send message' });
+    return res.status(500).json({ error: 'Xabarni yuborishda xatolik yuz berdi' });
   }
 }
