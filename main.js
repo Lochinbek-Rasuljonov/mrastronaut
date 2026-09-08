@@ -260,6 +260,22 @@ document.querySelectorAll('.svc-card,.why-card').forEach(card=>{
   });
 });
 
+/* ── BACKGROUND VIDEO SMOOTH PLAYBACK ───────────────────── */
+const bgVideo = document.querySelector('.bg-video');
+if (bgVideo) {
+  const ensurePlay = () => {
+    if (bgVideo.paused) {
+      bgVideo.play().catch(() => {});
+    }
+  };
+  ensurePlay();
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) ensurePlay();
+  });
+  window.addEventListener('focus', ensurePlay);
+  document.addEventListener('touchstart', ensurePlay, { once: true, passive: true });
+}
+
 })();
 
 /* ── CUSTOM DROPDOWN ───────────────────────────────────── */
