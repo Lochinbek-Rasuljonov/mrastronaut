@@ -562,21 +562,19 @@ if (dd) {
   });
 }
 
-/* ── SUCCESS 3D ANIMATION ──────────────────────────────── */
-
-/* ── SUCCESS 3D ANIMATION ──────────────────────────────── */
+/* ── SUCCESS 3D ROCKET LAUNCH ANIMATION ────────────────── */
 function showSuccess3DAnimation(messageText) {
   if (typeof THREE === 'undefined') {
     const script = document.createElement('script');
     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
-    script.onload = () => initThreeJsAnimation(messageText);
+    script.onload = () => initRocketLaunchAnimation(messageText);
     document.head.appendChild(script);
   } else {
-    initThreeJsAnimation(messageText);
+    initRocketLaunchAnimation(messageText);
   }
 }
 
-function initThreeJsAnimation(messageText) {
+function initRocketLaunchAnimation(messageText) {
   const existing = document.getElementById('success-3d-overlay');
   if (existing) {
     if (typeof existing.__cleanup === 'function') existing.__cleanup();
@@ -589,7 +587,7 @@ function initThreeJsAnimation(messageText) {
     position: 'fixed', top: '0', left: '0', width: '100%', height: '100%',
     backgroundColor: '#05050a', zIndex: '999999', display: 'flex',
     flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-    opacity: '0', transition: 'opacity 0.8s ease-out', overflow: 'hidden'
+    opacity: '0', transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1)', overflow: 'hidden'
   });
 
   const canvasContainer = document.createElement('div');
@@ -600,10 +598,11 @@ function initThreeJsAnimation(messageText) {
 
   const textContainer = document.createElement('div');
   Object.assign(textContainer.style, {
-    position: 'absolute', zIndex: '2', bottom: '20%', left: '50%',
+    position: 'absolute', zIndex: '2', bottom: '15%', left: '50%',
     transform: 'translateX(-50%) translateY(40px)', opacity: '0',
     color: '#fff', fontFamily: '"Space Grotesk", var(--sans), sans-serif',
-    textAlign: 'center', transition: 'all 1.2s cubic-bezier(0.16, 1, 0.3, 1)'
+    textAlign: 'center', transition: 'all 1.2s cubic-bezier(0.16, 1, 0.3, 1)',
+    pointerEvents: 'none', width: 'min(90%, 650px)'
   });
   
   const curLang = document.querySelector('.lang-btn.active')?.dataset.lang || 'uz';
@@ -611,14 +610,14 @@ function initThreeJsAnimation(messageText) {
   const subText = curT['toast_success_sub'] || 'Buyurtma qabul qilindi';
 
   textContainer.innerHTML = `
-    <div style="font-size: clamp(28px, 5vw, 42px); font-weight: 700; letter-spacing: 3px; text-transform: uppercase; background: linear-gradient(135deg, #fff 0%, #eab308 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0px 10px 30px rgba(74,222,128,0.2);">
+    <div style="font-size: clamp(24px, 4.5vw, 36px); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; background: linear-gradient(135deg, #ffffff 0%, #c084fc 50%, #38bdf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0px 8px 24px rgba(192,132,252,0.35);">
       ${messageText}
     </div>
-    <div style="margin-top: 15px; font-size: clamp(14px, 2vw, 16px); color: #a0a0a0; letter-spacing: 2px; font-weight: 300; display: flex; align-items: center; justify-content: center; gap: 10px;">
-      <span style="display:inline-block; width: 6px; height: 6px; background: #eab308; border-radius: 50%; box-shadow: 0 0 12px 2px #eab308; animation: pulse3d 2s infinite;"></span>
-      <span>${subText}</span>
+    <div style="margin-top: 14px; font-size: clamp(13px, 1.8vw, 15px); color: #94a3b8; letter-spacing: 1.5px; font-weight: 400; display: inline-flex; align-items: center; justify-content: center; gap: 10px; background: rgba(255,255,255,0.04); padding: 8px 18px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(12px);">
+      <span style="display:inline-block; width: 8px; height: 8px; background: #38bdf8; border-radius: 50%; box-shadow: 0 0 12px 3px #38bdf8; animation: rocketPulse 1.5s infinite;"></span>
+      <span>${subText} · Loyiha start oldi 🚀</span>
     </div>
-    <style>@keyframes pulse3d { 0% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.5); } 100% { opacity: 0.5; transform: scale(1); } }</style>
+    <style>@keyframes rocketPulse { 0%, 100% { opacity: 0.6; transform: scale(1); } 50% { opacity: 1; transform: scale(1.4); } }</style>
   `;
   overlay.appendChild(textContainer);
   document.body.appendChild(overlay);
@@ -627,103 +626,157 @@ function initThreeJsAnimation(messageText) {
 
   // THREE.JS SETUP
   const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x05050a, 0.002);
+  scene.fog = new THREE.FogExp2(0x05050a, 0.0015);
   
-  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-  camera.position.z = 30;
+  const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.position.set(0, 0, 32);
 
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   canvasContainer.appendChild(renderer.domElement);
 
-  // LIGHTS
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-  scene.add(ambientLight);
-  const pointLight = new THREE.PointLight(0x4ade80, 2, 100);
-  pointLight.position.set(0, 0, 10);
-  scene.add(pointLight);
-
-  // 3D NEON BANANA
-  const checkGroup = new THREE.Group();
+  // ROCKET GROUP
+  const rocketGroup = new THREE.Group();
+  rocketGroup.position.set(0, -28, 0);
+  rocketGroup.scale.set(0.1, 0.1, 0.1);
   
   const textureLoader = new THREE.TextureLoader();
-  const bananaTex = textureLoader.load('assets/banana.jpg');
-  
-  const geometry = new THREE.PlaneGeometry(16, 16);
-  const material = new THREE.MeshBasicMaterial({
-    map: bananaTex,
-    blending: THREE.AdditiveBlending,
+  const rocketTexture = textureLoader.load('assets/neon-rocket.png');
+  rocketTexture.generateMipmaps = true;
+  rocketTexture.minFilter = THREE.LinearMipmapLinearFilter;
+
+  // Rocket Mesh (Sleek aspect ratio 1:1 plane)
+  const rocketGeo = new THREE.PlaneGeometry(16, 16);
+  const rocketMat = new THREE.MeshBasicMaterial({
+    map: rocketTexture,
     transparent: true,
+    blending: THREE.AdditiveBlending,
     depthWrite: false
   });
-  
-  const checkMesh = new THREE.Mesh(geometry, material);
-  checkMesh.scale.set(0.01, 0.01, 0.01);
-  checkGroup.add(checkMesh);
-  
-  // Glowing rings around banana
-  const ringGeo1 = new THREE.TorusGeometry(10, 0.1, 16, 100);
-  const ringMat1 = new THREE.MeshBasicMaterial({ color: 0xeab308, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending });
-  const ring1 = new THREE.Mesh(ringGeo1, ringMat1);
-  checkGroup.add(ring1);
-  
-  const ringGeo2 = new THREE.TorusGeometry(12, 0.05, 16, 100);
-  const ring2 = new THREE.Mesh(ringGeo2, ringMat1);
-  ring2.rotation.x = Math.PI / 2;
-  checkGroup.add(ring2);
-  
-  scene.add(checkGroup);
+  const rocketMesh = new THREE.Mesh(rocketGeo, rocketMat);
+  rocketGroup.add(rocketMesh);
 
-  // STARS / PARTICLES
-  const starsGeo = new THREE.BufferGeometry();
-  const starsCount = 2000;
-  const posArray = new Float32Array(starsCount * 3);
-  const colorsArray = new Float32Array(starsCount * 3);
-  
-  for(let i = 0; i < starsCount * 3; i+=3) {
-    posArray[i] = (Math.random() - 0.5) * 200;
-    posArray[i+1] = (Math.random() - 0.5) * 200;
-    posArray[i+2] = (Math.random() - 0.5) * 400 - 100;
-    
-    colorsArray[i] = 0.2 + Math.random()*0.3;
-    colorsArray[i+1] = 0.8 + Math.random()*0.2;
-    colorsArray[i+2] = 0.5 + Math.random()*0.5;
-  }
-  
-  starsGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-  starsGeo.setAttribute('color', new THREE.BufferAttribute(colorsArray, 3));
-  
-  const starsMat = new THREE.PointsMaterial({
-    size: 0.5, vertexColors: true, transparent: true, opacity: 0.8,
-    blending: THREE.AdditiveBlending
+  // Glowing Telemetry Rings (Purple and Cyan - matching the site brand)
+  const ringMat1 = new THREE.MeshBasicMaterial({
+    color: 0xa855f7, transparent: true, opacity: 0.65, blending: THREE.AdditiveBlending
   });
-  const starMesh = new THREE.Points(starsGeo, starsMat);
-  scene.add(starMesh);
+  const ringGeo1 = new THREE.TorusGeometry(8.5, 0.08, 16, 80);
+  const ring1 = new THREE.Mesh(ringGeo1, ringMat1);
+  ring1.rotation.x = Math.PI / 2.3;
+  rocketGroup.add(ring1);
 
-  let mouseX = 0;
-  let mouseY = 0;
+  const ringMat2 = new THREE.MeshBasicMaterial({
+    color: 0x38bdf8, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending
+  });
+  const ringGeo2 = new THREE.TorusGeometry(10.5, 0.05, 16, 80);
+  const ring2 = new THREE.Mesh(ringGeo2, ringMat2);
+  ring2.rotation.x = -Math.PI / 2.6;
+  rocketGroup.add(ring2);
+
+  scene.add(rocketGroup);
+
+  // THRUSTER EXHAUST PARTICLES (Streaming downwards from the engine)
+  const exhaustCount = 400;
+  const exhaustGeo = new THREE.BufferGeometry();
+  const exhaustPos = new Float32Array(exhaustCount * 3);
+  const exhaustColors = new Float32Array(exhaustCount * 3);
+  const exhaustVels = [];
+
+  for (let i = 0; i < exhaustCount; i++) {
+    exhaustPos[i * 3] = (Math.random() - 0.5) * 1.5;
+    exhaustPos[i * 3 + 1] = -6 - Math.random() * 8;
+    exhaustPos[i * 3 + 2] = (Math.random() - 0.5) * 1.5;
+
+    // Cyan / Electric Blue / Neon Purple engine colors
+    const isCyan = Math.random() > 0.3;
+    exhaustColors[i * 3] = isCyan ? 0.2 : 0.7;
+    exhaustColors[i * 3 + 1] = isCyan ? 0.8 : 0.3;
+    exhaustColors[i * 3 + 2] = 1.0;
+
+    exhaustVels.push({
+      vx: (Math.random() - 0.5) * 0.35,
+      vy: -(Math.random() * 1.2 + 0.8),
+      vz: (Math.random() - 0.5) * 0.35,
+      life: Math.random() * 40
+    });
+  }
+
+  exhaustGeo.setAttribute('position', new THREE.BufferAttribute(exhaustPos, 3));
+  exhaustGeo.setAttribute('color', new THREE.BufferAttribute(exhaustColors, 3));
+
+  const exhaustMat = new THREE.PointsMaterial({
+    size: 1.2,
+    vertexColors: true,
+    transparent: true,
+    opacity: 0.9,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  });
+  const exhaustMesh = new THREE.Points(exhaustGeo, exhaustMat);
+  rocketGroup.add(exhaustMesh);
+
+  // VERTICAL WARP SPEED STARFIELD (2000 stars racing downwards)
+  const starsCount = 2000;
+  const starsGeo = new THREE.BufferGeometry();
+  const starsPos = new Float32Array(starsCount * 3);
+  const starsColors = new Float32Array(starsCount * 3);
+
+  for (let i = 0; i < starsCount * 3; i += 3) {
+    starsPos[i] = (Math.random() - 0.5) * 160;
+    starsPos[i + 1] = (Math.random() - 0.5) * 180;
+    starsPos[i + 2] = (Math.random() - 0.5) * 200 - 30;
+
+    const rnd = Math.random();
+    starsColors[i] = rnd > 0.5 ? 0.8 : 0.4;
+    starsColors[i + 1] = rnd > 0.5 ? 0.6 : 0.8;
+    starsColors[i + 2] = 1.0;
+  }
+
+  starsGeo.setAttribute('position', new THREE.BufferAttribute(starsPos, 3));
+  starsGeo.setAttribute('color', new THREE.BufferAttribute(starsColors, 3));
+
+  const starsMat = new THREE.PointsMaterial({
+    size: 0.7,
+    vertexColors: true,
+    transparent: true,
+    opacity: 0.75,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  });
+  const starsMesh = new THREE.Points(starsGeo, starsMat);
+  scene.add(starsMesh);
+
+  // INTERACTIVE MOUSE / GYRO TILT
+  let mouseX = 0, mouseY = 0;
+  let targetTiltX = 0, targetTiltY = 0;
+
   const onMouseMove = (e) => {
-    mouseX = (e.clientX - window.innerWidth/2) * 0.05;
-    mouseY = (e.clientY - window.innerHeight/2) * 0.05;
-  }
+    mouseX = (e.clientX - window.innerWidth / 2) / (window.innerWidth / 2);
+    mouseY = (e.clientY - window.innerHeight / 2) / (window.innerHeight / 2);
+    targetTiltY = mouseX * 0.3;
+    targetTiltX = -mouseY * 0.2;
+  };
   window.addEventListener('mousemove', onMouseMove);
-  
+
   const onTouchMove = (e) => {
-    if(e.touches.length > 0) {
-      mouseX = (e.touches[0].clientX - window.innerWidth/2) * 0.05;
-      mouseY = (e.touches[0].clientY - window.innerHeight/2) * 0.05;
+    if (e.touches.length > 0) {
+      mouseX = (e.touches[0].clientX - window.innerWidth / 2) / (window.innerWidth / 2);
+      mouseY = (e.touches[0].clientY - window.innerHeight / 2) / (window.innerHeight / 2);
+      targetTiltY = mouseX * 0.3;
+      targetTiltX = -mouseY * 0.2;
     }
-  }
+  };
   window.addEventListener('touchmove', onTouchMove, { passive: true });
 
   const resize = () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-  }
+  };
   window.addEventListener('resize', resize);
 
+  // ANIMATION LOOP
   let startTime = Date.now();
   let animationFrameId;
   let isDestroyed = false;
@@ -731,43 +784,82 @@ function initThreeJsAnimation(messageText) {
   function animate() {
     if (isDestroyed) return;
     animationFrameId = requestAnimationFrame(animate);
-    
-    let elapsed = Date.now() - startTime;
-    
-    // Camera mouse pan
-    camera.position.x += (mouseX - camera.position.x) * 0.05;
-    camera.position.y += (-mouseY - camera.position.y) * 0.05;
-    camera.lookAt(scene.position);
 
-    // Stars warp effect
-    const positions = starMesh.geometry.attributes.position.array;
-    let warpSpeed = Math.max(0.5, 15 - elapsed * 0.01);
-    
-    for(let i = 2; i < starsCount * 3; i += 3) {
-      positions[i] += warpSpeed;
-      if (positions[i] > 50) {
-        positions[i] -= 400;
+    const elapsed = Date.now() - startTime;
+
+    // 1. STARFIELD SPEED (Accelerates to warp speed)
+    const starPositions = starsGeo.attributes.position.array;
+    let warpSpeed = Math.min(3.5, 0.4 + (elapsed * 0.0007));
+
+    // At final stage (boost away), hyperspace accelerates
+    if (elapsed > 4500) {
+      warpSpeed += (elapsed - 4500) * 0.015;
+    }
+
+    for (let i = 1; i < starsCount * 3; i += 3) {
+      starPositions[i] -= warpSpeed;
+      if (starPositions[i] < -90) {
+        starPositions[i] += 180;
       }
     }
-    starMesh.geometry.attributes.position.needsUpdate = true;
-    starMesh.rotation.z += 0.002;
+    starsGeo.attributes.position.needsUpdate = true;
 
-    // Checkmark animation
-    if (elapsed > 800) {
+    // 2. ROCKET LIFTOFF & FLIGHT TRAJECTORY
+    if (elapsed < 1400) {
+      // Phase 1: Rapid Ascent to Center
+      const t = Math.min(1, elapsed / 1400);
+      const easeOut = 1 - Math.pow(1 - t, 3);
+      rocketGroup.position.y = -28 + easeOut * 28;
+      const curScale = 0.1 + easeOut * 1.15;
+      rocketGroup.scale.set(curScale, curScale, curScale);
+    } else if (elapsed < 4500) {
+      // Phase 2: Steady Cruise & Subtle Hover Oscillation
+      const cruiseElapsed = elapsed - 1400;
+      const hoverY = Math.sin(cruiseElapsed * 0.003) * 0.8;
+      rocketGroup.position.y = 0 + hoverY;
+      rocketGroup.scale.set(1.25, 1.25, 1.25);
+
+      // Smooth reveal of success HUD
       textContainer.style.opacity = '1';
       textContainer.style.transform = 'translateX(-50%) translateY(0)';
-      
-      let scaleTarget = 1.5;
-      checkMesh.scale.x += (scaleTarget - checkMesh.scale.x) * 0.1;
-      checkMesh.scale.y += (scaleTarget - checkMesh.scale.y) * 0.1;
-      checkMesh.scale.z += (scaleTarget - checkMesh.scale.z) * 0.1;
-      
-      checkGroup.rotation.y += 0.02;
-      ring1.rotation.x += 0.01;
-      ring1.rotation.y += 0.02;
-      ring2.rotation.y += 0.015;
-      ring2.rotation.z += 0.01;
+    } else {
+      // Phase 3: Final Hyperspace Boost Out of Frame
+      const boostElapsed = elapsed - 4500;
+      const boostY = Math.pow(boostElapsed * 0.02, 2.2);
+      rocketGroup.position.y += boostY * 0.15;
+      rocketGroup.scale.y += 0.025; // Warp stretch!
     }
+
+    // Aerodynamic tilt & user interaction
+    rocketGroup.rotation.y += (targetTiltY - rocketGroup.rotation.y) * 0.08;
+    rocketGroup.rotation.x += (targetTiltX - rocketGroup.rotation.x) * 0.08;
+    rocketGroup.rotation.z = -targetTiltY * 0.5 + Math.sin(elapsed * 0.004) * 0.03;
+
+    // Telemetry rings rotation
+    ring1.rotation.z += 0.025;
+    ring2.rotation.z -= 0.018;
+
+    // 3. THRUSTER EXHAUST PARTICLES PHYSICS
+    const exPos = exhaustGeo.attributes.position.array;
+    for (let i = 0; i < exhaustCount; i++) {
+      const idx = i * 3;
+      const vel = exhaustVels[i];
+
+      exPos[idx] += vel.vx;
+      exPos[idx + 1] += vel.vy;
+      exPos[idx + 2] += vel.vz;
+      vel.life++;
+
+      // Respawn particle at thruster nozzle
+      if (vel.life > 35 || exPos[idx + 1] < -20) {
+        exPos[idx] = (Math.random() - 0.5) * 1.2;
+        exPos[idx + 1] = -5.8;
+        exPos[idx + 2] = (Math.random() - 0.5) * 1.2;
+        vel.vy = -(Math.random() * 1.4 + 0.9);
+        vel.life = 0;
+      }
+    }
+    exhaustGeo.attributes.position.needsUpdate = true;
 
     renderer.render(scene, camera);
   }
@@ -784,14 +876,17 @@ function initThreeJsAnimation(messageText) {
     window.removeEventListener('mousemove', onMouseMove);
     window.removeEventListener('touchmove', onTouchMove);
     if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
-    
+
     renderer.dispose();
-    geometry.dispose();
-    material.dispose();
-    if (bananaTex) bananaTex.dispose();
+    rocketGeo.dispose();
+    rocketMat.dispose();
+    if (rocketTexture) rocketTexture.dispose();
     ringGeo1.dispose();
-    ringGeo2.dispose();
     ringMat1.dispose();
+    ringGeo2.dispose();
+    ringMat2.dispose();
+    exhaustGeo.dispose();
+    exhaustMat.dispose();
     starsGeo.dispose();
     starsMat.dispose();
   }
@@ -800,5 +895,5 @@ function initThreeJsAnimation(messageText) {
   fadeOutTimer = setTimeout(() => {
     overlay.style.opacity = '0';
     cleanupTimer = setTimeout(cleanup, 800);
-  }, 6000);
+  }, 5800);
 }
