@@ -238,7 +238,7 @@ function showToast(isSuccess=true, customMsg=null){
     if(iconEl)iconEl.innerHTML='<i class="fa-solid fa-circle-exclamation"></i>';
     if(textEl){
       textEl.dataset.key='toast_err';
-      textEl.textContent=customMsg || curT['toast_err']||(typeof T!=='undefined'&&T.uz&&T.uz['toast_err'])||'Xatolik yuz berdi. Iltimos, qayta urinib koʻring yoki xatoni tekshiring.';
+      textEl.textContent=customMsg || curT['toast_err']||(typeof T!=='undefined'&&T.uz&&T.uz['toast_err'])||'Xatolik yuz berdi. Iltimos, qayta urinib koʻring.';
     }
   }
 
@@ -354,10 +354,10 @@ if(form){
       const ct = resp.headers.get('content-type') || '';
 
       if (resp.redirected) {
-        customErrorMsg = 'Vercel Deployment Protection (SSO) faol. Iltimos, keyinroq urinib koring.';
+        customErrorMsg = 'Tarmoq xatosi yoki ruxsat yoʻq. Iltimos, keyinroq urinib koʻring.';
         isOk = false;
       } else if (resp.status === 401 || resp.status === 403) {
-        customErrorMsg = 'Ruxsat berilmagan (Vercel himoyasi faol). Iltimos, keyinroq urinib koring.';
+        customErrorMsg = 'Ruxsat berilmagan. Iltimos, keyinroq urinib koʻring.';
         isOk = false;
       } else if (resp.ok) {
         if (ct.includes('application/json')) {
@@ -369,7 +369,7 @@ if(form){
             customErrorMsg = data?.error || 'Serverda kutilmagan xatolik yuz berdi.';
           }
         } else {
-          customErrorMsg = 'Serverdan kutilmagan javob keldi (Vercel SSO yoki xavfsizlik sahifasi). Iltimos, keyinroq urinib koring.';
+          customErrorMsg = 'Serverdan kutilmagan javob keldi. Iltimos, keyinroq urinib koʻring.';
           isOk = false;
         }
       } else {
@@ -377,7 +377,7 @@ if(form){
           const errData = await resp.json().catch(() => null);
           customErrorMsg = errData?.error || 'Server xatosi yuz berdi.';
         } else if (ct.includes('text/html')) {
-          customErrorMsg = 'Server javob bermadi (Vercel SSO yoki notoʻgʻri marshrut). Iltimos, keyinroq urinib koring.';
+          customErrorMsg = 'Server vaqtincha javob bermadi. Iltimos, keyinroq urinib koʻring.';
         } else {
           customErrorMsg = `Xatolik yuz berdi (Status: ${resp.status}). Iltimos, keyinroq urinib koring.`;
         }
@@ -418,7 +418,7 @@ if(form){
       showToast(true);
     } else {
       if (!customErrorMsg) {
-        customErrorMsg = curT['toast_err'] || (typeof T !== 'undefined' && T.uz && T.uz['toast_err']) || 'Xatolik yuz berdi. Iltimos, qayta urinib koʻring yoki xatoni tekshiring.';
+        customErrorMsg = curT['toast_err'] || (typeof T !== 'undefined' && T.uz && T.uz['toast_err']) || 'Xatolik yuz berdi. Iltimos, qayta urinib koʻring.';
       }
       showToast(false, customErrorMsg);
     }
@@ -565,7 +565,12 @@ if (dd) {
 /* ── SUCCESS 3D ANIMATION ──────────────────────────────── */
 function showSuccess3DAnimation(messageText) {
   const existing = document.getElementById('success-3d-overlay');
-  if (existing) existing.remove();
+  if (existing) {
+    if (typeof existing.__cleanup === 'function') {
+      existing.__cleanup();
+    }
+    existing.remove();
+  }
 
   const overlay = document.createElement('div');
   overlay.id = 'success-3d-overlay';
@@ -574,15 +579,14 @@ function showSuccess3DAnimation(messageText) {
   overlay.style.left = '0';
   overlay.style.width = '100%';
   overlay.style.height = '100%';
-  overlay.style.backgroundColor = 'rgba(10, 10, 15, 0.95)';
-  overlay.style.backdropFilter = 'blur(10px)';
+  overlay.style.backgroundColor = '#05050a'; // Solid dark for best composite
   overlay.style.zIndex = '999999';
   overlay.style.display = 'flex';
   overlay.style.flexDirection = 'column';
   overlay.style.alignItems = 'center';
   overlay.style.justifyContent = 'center';
   overlay.style.opacity = '0';
-  overlay.style.transition = 'opacity 0.6s ease-out';
+  overlay.style.transition = 'opacity 0.8s ease-out';
   overlay.style.overflow = 'hidden';
   
   const canvas = document.createElement('canvas');
@@ -598,25 +602,28 @@ function showSuccess3DAnimation(messageText) {
   textContainer.style.zIndex = '2';
   textContainer.style.bottom = '20%';
   textContainer.style.left = '50%';
-  textContainer.style.transform = 'translateX(-50%) translateY(30px)';
+  textContainer.style.transform = 'translateX(-50%) translateY(40px)';
   textContainer.style.opacity = '0';
   textContainer.style.color = '#fff';
   textContainer.style.fontFamily = '"Space Grotesk", var(--sans), sans-serif';
   textContainer.style.textAlign = 'center';
-  textContainer.style.transition = 'all 1s cubic-bezier(0.16, 1, 0.3, 1)';
+  textContainer.style.transition = 'all 1.2s cubic-bezier(0.16, 1, 0.3, 1)';
   
   const curLang = document.querySelector('.lang-btn.active')?.dataset.lang || 'uz';
   const curT = (typeof T !== 'undefined' && T[curLang]) || {};
   const subText = curT['toast_success_sub'] || 'Buyurtma qabul qilindi';
 
   textContainer.innerHTML = `
-    <div style="font-size: clamp(24px, 4vw, 36px); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; background: linear-gradient(135deg, #fff 0%, #aaa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0px 4px 20px rgba(255,255,255,0.1);">
+    <div style="font-size: clamp(28px, 5vw, 42px); font-weight: 700; letter-spacing: 3px; text-transform: uppercase; background: linear-gradient(135deg, #fff 0%, #4ade80 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0px 10px 30px rgba(74,222,128,0.2);">
       ${messageText}
     </div>
-    <div style="margin-top: 15px; font-size: clamp(14px, 2vw, 16px); color: #888; letter-spacing: 1px; font-weight: 300; display: flex; align-items: center; justify-content: center; gap: 8px;">
-      <span style="display:inline-block; width: 8px; height: 8px; background: #4ade80; border-radius: 50%; box-shadow: 0 0 10px #4ade80;"></span>
+    <div style="margin-top: 15px; font-size: clamp(14px, 2vw, 16px); color: #a0a0a0; letter-spacing: 2px; font-weight: 300; display: flex; align-items: center; justify-content: center; gap: 10px;">
+      <span style="display:inline-block; width: 6px; height: 6px; background: #4ade80; border-radius: 50%; box-shadow: 0 0 12px 2px #4ade80; animation: pulse3d 2s infinite;"></span>
       <span>${subText}</span>
     </div>
+    <style>
+      @keyframes pulse3d { 0% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.5); } 100% { opacity: 0.5; transform: scale(1); } }
+    </style>
   `;
   overlay.appendChild(textContainer);
   document.body.appendChild(overlay);
@@ -627,144 +634,198 @@ function showSuccess3DAnimation(messageText) {
 
   const ctx = canvas.getContext('2d', { alpha: false });
   let w, h, cx, cy;
+  let mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
+  let isInit = true;
 
   function resize() {
-    w = canvas.width = window.innerWidth;
-    h = canvas.height = window.innerHeight;
+    w = window.innerWidth;
+    h = window.innerHeight;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.scale(dpr, dpr);
     cx = w / 2;
     cy = h / 2 - 40;
+    if (isInit) {
+      mouse.x = cx;
+      mouse.y = cy;
+      mouse.targetX = cx;
+      mouse.targetY = cy;
+      isInit = false;
+    }
   }
   window.addEventListener('resize', resize);
   resize();
 
-  // Create 3D wireframe sphere (planet) nodes
-  const nodes = [];
-  const radius = 100;
-  const latitudes = 12;
-  const longitudes = 24;
-
-  for (let lat = 0; lat <= latitudes; lat++) {
-    const theta = (lat * Math.PI) / latitudes;
-    const sinTheta = Math.sin(theta);
-    const cosTheta = Math.cos(theta);
-
-    for (let lon = 0; lon <= longitudes; lon++) {
-      const phi = (lon * 2 * Math.PI) / longitudes;
-      const sinPhi = Math.sin(phi);
-      const cosPhi = Math.cos(phi);
-
-      const x = radius * sinTheta * cosPhi;
-      const y = radius * cosTheta;
-      const z = radius * sinTheta * sinPhi;
-      nodes.push({ x, y, z });
+  function onMouseMove(e) {
+    mouse.targetX = e.clientX;
+    mouse.targetY = e.clientY;
+  }
+  window.addEventListener('mousemove', onMouseMove);
+  
+  function onTouchMove(e) {
+    if(e.touches.length > 0) {
+      mouse.targetX = e.touches[0].clientX;
+      mouse.targetY = e.touches[0].clientY;
     }
   }
+  window.addEventListener('touchmove', onTouchMove, { passive: true });
 
-  // Define edges
-  const edges = [];
-  for (let lat = 0; lat < latitudes; lat++) {
-    for (let lon = 0; lon < longitudes; lon++) {
-      const current = lat * (longitudes + 1) + lon;
-      const nextLon = current + 1;
-      const nextLat = (lat + 1) * (longitudes + 1) + lon;
+  // Galaxy Particles
+  const particles = [];
+  const particleCount = 2500;
+  const arms = 5;
+  const armSpread = 0.6;
+  const colors = ['#4ade80', '#14b8a6', '#2dd4bf', '#ffffff', '#0f766e'];
 
-      edges.push([current, nextLon]); // Horizontal
-      edges.push([current, nextLat]); // Vertical
-    }
+  for (let i = 0; i < particleCount; i++) {
+    const r = Math.random() * 450;
+    const armAngle = (Math.floor(Math.random() * arms) * (Math.PI * 2)) / arms;
+    const offset = (Math.random() - 0.5) * armSpread * r;
+    const angle = armAngle + (r * 0.015) + offset / 100;
+
+    particles.push({
+      r: r,
+      angle: angle,
+      size: Math.random() * 1.5 + 0.5,
+      speed: (Math.random() * 0.005 + 0.001) * (500 / (r + 50)),
+      color: colors[Math.floor(Math.random() * colors.length)],
+      baseY: (Math.random() - 0.5) * (1500 / (r + 10)),
+      phase: Math.random() * Math.PI * 2
+    });
+  }
+
+  // Core glow particle
+  const coreParticles = [];
+  for (let i = 0; i < 50; i++) {
+    coreParticles.push({
+      x: (Math.random() - 0.5) * 40,
+      y: (Math.random() - 0.5) * 40,
+      z: (Math.random() - 0.5) * 40,
+      size: Math.random() * 3 + 1,
+      color: '#4ade80',
+      speedX: (Math.random() - 0.5) * 0.5,
+      speedY: (Math.random() - 0.5) * 0.5,
+      speedZ: (Math.random() - 0.5) * 0.5
+    });
   }
 
   let startTime = Date.now();
   let animationFrameId;
-  const fov = 400;
+  const fov = 700;
+  let isDestroyed = false;
 
   function animate() {
+    if (isDestroyed) return;
     let now = Date.now();
     let elapsed = now - startTime;
 
-    // Dark bg with motion blur effect
-    ctx.fillStyle = 'rgba(10, 10, 15, 0.4)';
+    mouse.x += (mouse.targetX - mouse.x) * 0.05;
+    mouse.y += (mouse.targetY - mouse.y) * 0.05;
+
+    // Trail effect
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = 'rgba(5, 5, 10, 0.18)';
     ctx.fillRect(0, 0, w, h);
 
-    if (elapsed > 1200) {
+    ctx.globalCompositeOperation = 'lighter';
+
+    if (elapsed > 1000) {
       textContainer.style.opacity = '1';
       textContainer.style.transform = 'translateX(-50%) translateY(0)';
     }
 
-    let rotX = elapsed * 0.0005;
-    let rotY = elapsed * 0.001;
+    // Dynamic rotation based on mouse and time
+    let rotX = (mouse.y - cy) * 0.0015 + Math.PI / 3;
+    let rotY = elapsed * 0.0003 + (mouse.x - cx) * 0.0015;
 
-    // Project and draw edges
-    ctx.beginPath();
-    ctx.strokeStyle = 'rgba(74, 222, 128, 0.6)';
-    ctx.lineWidth = 1;
+    // Draw Core Particles
+    for (let i = 0; i < coreParticles.length; i++) {
+      const p = coreParticles[i];
+      p.x += p.speedX; p.y += p.speedY; p.z += p.speedZ;
+      // bound core
+      if(p.x > 30 || p.x < -30) p.speedX *= -1;
+      if(p.y > 30 || p.y < -30) p.speedY *= -1;
+      if(p.z > 30 || p.z < -30) p.speedZ *= -1;
 
-    for (let i = 0; i < edges.length; i++) {
-      const e = edges[i];
-      const p1 = nodes[e[0]];
-      const p2 = nodes[e[1]];
-
-      // Rotate p1
-      let y1 = p1.y * Math.cos(rotX) - p1.z * Math.sin(rotX);
-      let z1 = p1.y * Math.sin(rotX) + p1.z * Math.cos(rotX);
-      let x1 = p1.x * Math.cos(rotY) - z1 * Math.sin(rotY);
-      z1 = p1.x * Math.sin(rotY) + z1 * Math.cos(rotY);
-
-      // Rotate p2
-      let y2 = p2.y * Math.cos(rotX) - p2.z * Math.sin(rotX);
-      let z2 = p2.y * Math.sin(rotX) + p2.z * Math.cos(rotX);
-      let x2 = p2.x * Math.cos(rotY) - z2 * Math.sin(rotY);
-      z2 = p2.x * Math.sin(rotY) + z2 * Math.cos(rotY);
-
-      // Scale and position
-      let z1Offset = z1 + 300;
-      let z2Offset = z2 + 300;
-      if (z1Offset < 1) z1Offset = 1;
-      if (z2Offset < 1) z2Offset = 1;
-
-      let scale1 = fov / z1Offset;
-      let scale2 = fov / z2Offset;
-
-      let sx1 = x1 * scale1 + cx;
-      let sy1 = y1 * scale1 + cy;
-      let sx2 = x2 * scale2 + cx;
-      let sy2 = y2 * scale2 + cy;
-
-      ctx.moveTo(sx1, sy1);
-      ctx.lineTo(sx2, sy2);
-    }
-    ctx.stroke();
-
-    // Draw nodes slightly brighter
-    ctx.fillStyle = '#4ade80';
-    for (let i = 0; i < nodes.length; i++) {
-      const p = nodes[i];
       let y1 = p.y * Math.cos(rotX) - p.z * Math.sin(rotX);
       let z1 = p.y * Math.sin(rotX) + p.z * Math.cos(rotX);
       let x1 = p.x * Math.cos(rotY) - z1 * Math.sin(rotY);
       z1 = p.x * Math.sin(rotY) + z1 * Math.cos(rotY);
 
-      let z1Offset = z1 + 300;
-      if (z1Offset < 1) z1Offset = 1;
-      let scale1 = fov / z1Offset;
+      let zOffset = z1 + 600;
+      if (zOffset < 1) zOffset = 1;
+      let scale = fov / zOffset;
+      let sx = x1 * scale + cx;
+      let sy = y1 * scale + cy;
 
-      let sx1 = x1 * scale1 + cx;
-      let sy1 = y1 * scale1 + cy;
-
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = 0.6;
       ctx.beginPath();
-      ctx.arc(sx1, sy1, 1.5 * scale1, 0, Math.PI * 2);
+      ctx.arc(sx, sy, p.size * scale * 2, 0, Math.PI * 2);
       ctx.fill();
     }
+
+    // Draw Galaxy Particles
+    for (let i = 0; i < particleCount; i++) {
+      const p = particles[i];
+      p.angle += p.speed;
+      
+      let py = p.baseY + Math.sin(elapsed * 0.002 + p.phase) * 15;
+      const px = Math.cos(p.angle) * p.r;
+      const pz = Math.sin(p.angle) * p.r;
+
+      let y1 = py * Math.cos(rotX) - pz * Math.sin(rotX);
+      let z1 = py * Math.sin(rotX) + pz * Math.cos(rotX);
+      let x1 = px * Math.cos(rotY) - z1 * Math.sin(rotY);
+      z1 = px * Math.sin(rotY) + z1 * Math.cos(rotY);
+
+      let zOffset = z1 + 600;
+      if (zOffset < 1) zOffset = 1;
+
+      let scale = fov / zOffset;
+      let sx = x1 * scale + cx;
+      let sy = y1 * scale + cy;
+
+      const alpha = Math.min(1, Math.max(0, (1200 - zOffset) / 1000));
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = alpha * (p.r < 100 ? 0.8 : 0.5);
+      
+      ctx.beginPath();
+      ctx.arc(sx, sy, p.size * scale, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1.0;
 
     animationFrameId = requestAnimationFrame(animate);
   }
   animate();
 
-  setTimeout(() => {
+  let cleanupTimer;
+  let fadeOutTimer;
+
+  function cleanup() {
+    if (isDestroyed) return;
+    isDestroyed = true;
+    cancelAnimationFrame(animationFrameId);
+    clearTimeout(cleanupTimer);
+    clearTimeout(fadeOutTimer);
+    window.removeEventListener('resize', resize);
+    window.removeEventListener('mousemove', onMouseMove);
+    window.removeEventListener('touchmove', onTouchMove);
+    if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+  }
+
+  overlay.__cleanup = cleanup;
+
+  fadeOutTimer = setTimeout(() => {
     overlay.style.opacity = '0';
-    setTimeout(() => {
-      cancelAnimationFrame(animationFrameId);
-      window.removeEventListener('resize', resize);
-      if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
-    }, 600);
-  }, 5000);
+    cleanupTimer = setTimeout(() => {
+      cleanup();
+    }, 800);
+  }, 6000);
 }
+
+
