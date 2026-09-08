@@ -29,7 +29,7 @@ const T = {
     "stat4_val_suffix": " s",
     "sec_services_tag": "// XIZMATLAR",
     "sec_services_title": "Biz nimalar quramiz?",
-    "sec_services_sub": "Har bir xizmat professional darajada bajariladi — biznesingiz ajralib turishi va doimiy daromad keltirishi uchun.",
+    "sec_services_sub": "Har bir xizmat professional darajada bajariladi — biznesingiz ajralib turishi va barqaror foyda keltirishi uchun.",
     "most_popular": "Eng ommabop",
     "svc_order": "Buyurtma berish →",
     "svc1_t": "Veb-saytlar va Landinglar",
@@ -79,7 +79,7 @@ const T = {
     "proc4_d": "Loyihani serverga joylab, ishga tushiramiz va 30 kun davomida bepul texnik yordam beramiz.",
     "sec_why_tag": "// AFZALLIKLAR",
     "sec_why_title": "Raqobatchilardan O‘zish Vaqti",
-    "sec_why_sub": "Ijtimoiy tarmoqlar o‘tkinchi. Shaxsiy veb-saytingiz va botingiz esa doimiy daromad manbayidir.",
+    "sec_why_sub": "Ijtimoiy tarmoqlar o‘tkinchi. Shaxsiy veb-saytingiz va botingiz esa doimiy foyda manbayidir.",
     "why1_t": "24/7 Avtomat Savdo",
     "why1_d": "Xodimlar dam oladi, Telegram bot va saytingiz esa to‘xtovsiz ishlaydi. Tun-u kun buyurtmalar qabul qilinadi va hisoblanadi.",
     "why2_t": "Mutlaq Ishonch",
@@ -145,7 +145,7 @@ const T = {
     "f_note": "24 soat ichida javob beriladi · Bepul maslahatlashuv",
     "toast_msg": "Xabaringiz muvaffaqiyatli yuborildi! Tez orada bog‘lanamiz.",
     "toast_err": "Xatolik yuz berdi. Iltimos, qayta urinib ko‘ring yoki to‘g‘ridan-to‘g‘ri Telegram orqali yozing.",
-    "footer_tag": "Sifatli, xavfsiz va biznesingizga daromad keltiruvchi raqamli mahsulotlar yaratamiz.",
+    "footer_tag": "Sifatli, xavfsiz va biznesingizga real foyda keltiruvchi raqamli mahsulotlar yaratamiz.",
     "footer_copy": "© 2026 MrAstronaut. Barcha huquqlar himoyalangan."
 },
   cy: {
@@ -178,7 +178,7 @@ const T = {
     "stat4_val_suffix": " с",
     "sec_services_tag": "// ХИЗМАТЛАР",
     "sec_services_title": "Биз нималар қурамиз?",
-    "sec_services_sub": "Ҳар бир хизмат профессионал даражада бажарилади — бизнесингиз ажралиб туриши ва доимий даромад келтириши учун.",
+    "sec_services_sub": "Ҳар бир хизмат профессионал даражада бажарилади — бизнесингиз ажралиб туриши ва барқарор фойда келтириши учун.",
     "most_popular": "Энг оммабоп",
     "svc_order": "Буюртма бериш →",
     "svc1_t": "Веб-сайтлар ва Лендинглар",
@@ -228,7 +228,7 @@ const T = {
     "proc4_d": "Лойиҳани серверга жойлаб, ишга туширамиз ва 30 кун давомида бепул техник ёрдам берамиз.",
     "sec_why_tag": "// АФЗАЛЛИКЛАР",
     "sec_why_title": "Рақобатчилардан Ўзиш Вақти",
-    "sec_why_sub": "Ижтимоий тармоқлар ўткинчи. Шахсий веб-сайтингиз ва ботингиз эса доимий даромад манбаидир.",
+    "sec_why_sub": "Ижтимоий тармоқлар ўткинчи. Шахсий веб-сайтингиз ва ботингиз эса доимий фойда манбаидир.",
     "why1_t": "24/7 Автомат Савдо",
     "why1_d": "Ходимлар дам олади, Telegram бот ва сайтингиз эса тўхтовсиз ишлайди. Кечаю кундуз буюртмалар қабул қилинади ва ҳисобланади.",
     "why2_t": "Мутлақ Ишонч",
@@ -294,7 +294,7 @@ const T = {
     "f_note": "24 соат ичида жавоб берилади · Бепул маслаҳатлашув",
     "toast_msg": "Хабарингиз муваффақиятли юборилди! Тез орада боғланамиз.",
     "toast_err": "Хатолик юз берди. Илтимос, қайта уриниб кўринг ёки тўғридан-тўғри Telegram орқали ёзинг.",
-    "footer_tag": "Сифатли, хавфсиз ва бизнесингизга даромад келтирувчи рақамли маҳсулотлар яратамиз.",
+    "footer_tag": "Сифатли, хавфсиз ва бизнесингизга реал фойда келтирувчи рақамли маҳсулотлар яратамиз.",
     "footer_copy": "© 2026 MrAstronaut. Барча ҳуқуқлар ҳимояланган."
 },
   ru: {
