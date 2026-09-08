@@ -1,4 +1,4 @@
-:root{--bg:#000;--bg-alt:#0a0a0a;--bg-card:rgba(255,255,255,.03);--text:#fff;--muted:#8e8e8e;--border:rgba(255,255,255,.08);--border-h:rgba(255,255,255,.18);--pill:#28282a;--shadow:0 4px 14px rgba(0,0,0,.16);--sans:"Inter","Segoe UI",system-ui,sans-serif;--disp:"BubbledotICG-FinePos",monospace;--ts:clamp(34px,4.2vw,42px);--r:16px;--tr:.25s cubic-bezier(.22,1,.36,1);}
+:root{--bg:#000;--bg-alt:#0a0a0a;--bg-card:rgba(255,255,255,.03);--text:#fff;--muted:#8e8e8e;--border:rgba(255,255,255,.08);--border-h:rgba(255,255,255,.18);--pill:#28282a;--shadow:0 4px 14px rgba(0,0,0,.16);--sans:"Inter","Segoe UI",system-ui,sans-serif;--disp:"Pixelify Sans", monospace;--ts:clamp(34px,4.2vw,42px);--r:16px;--tr:.25s cubic-bezier(.22,1,.36,1);}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:hidden;}
@@ -86,7 +86,7 @@ body.menu-open{overflow:hidden;}
 .a2:hover{transform:translateY(-4px);}
 .a3:hover{transform:translateY(-2px);}
 .trust-pill{height:var(--ts);background:#28282a;border:1px solid rgba(255,255,255,.4);border-radius:999px;display:flex;align-items:center;margin-left:calc(var(--ts)*-.42);padding-left:calc(var(--ts)*.58);padding-right:clamp(12px,1.8vw,18px);font-weight:500;font-size:clamp(11.5px,1.3vw,13px);color:#c4c2c3;white-space:nowrap;}
-.headline{display:flex;flex-direction:column;font-family:var(--disp);font-size:clamp(36px,7.5vw,96px);letter-spacing:-.04em;line-height:1.06;color:#fff;white-space:nowrap;overflow:hidden;}
+.headline{display:flex;flex-direction:column;font-family:var(--disp);font-size:clamp(36px,7.5vw,96px);letter-spacing:-.02em;line-height:1.06;color:#fff;white-space:nowrap;overflow:hidden;}
 .hl-line{display:block;}
 .subhead{max-width:min(480px,92%);font-size:clamp(14px,1.6vw,17px);color:#ccc;opacity:.85;line-height:1.6;font-weight:400;}
 .hero-ctas{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
