@@ -563,51 +563,48 @@ if (dd) {
 }
 
 /* ── SUCCESS 3D ANIMATION ──────────────────────────────── */
+
+/* ── SUCCESS 3D ANIMATION ──────────────────────────────── */
 function showSuccess3DAnimation(messageText) {
+  if (typeof THREE === 'undefined') {
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+    script.onload = () => initThreeJsAnimation(messageText);
+    document.head.appendChild(script);
+  } else {
+    initThreeJsAnimation(messageText);
+  }
+}
+
+function initThreeJsAnimation(messageText) {
   const existing = document.getElementById('success-3d-overlay');
   if (existing) {
-    if (typeof existing.__cleanup === 'function') {
-      existing.__cleanup();
-    }
+    if (typeof existing.__cleanup === 'function') existing.__cleanup();
     existing.remove();
   }
 
   const overlay = document.createElement('div');
   overlay.id = 'success-3d-overlay';
-  overlay.style.position = 'fixed';
-  overlay.style.top = '0';
-  overlay.style.left = '0';
-  overlay.style.width = '100%';
-  overlay.style.height = '100%';
-  overlay.style.backgroundColor = '#05050a'; // Solid dark for best composite
-  overlay.style.zIndex = '999999';
-  overlay.style.display = 'flex';
-  overlay.style.flexDirection = 'column';
-  overlay.style.alignItems = 'center';
-  overlay.style.justifyContent = 'center';
-  overlay.style.opacity = '0';
-  overlay.style.transition = 'opacity 0.8s ease-out';
-  overlay.style.overflow = 'hidden';
-  
-  const canvas = document.createElement('canvas');
-  canvas.style.position = 'absolute';
-  canvas.style.top = '0';
-  canvas.style.left = '0';
-  canvas.style.width = '100%';
-  canvas.style.height = '100%';
-  overlay.appendChild(canvas);
+  Object.assign(overlay.style, {
+    position: 'fixed', top: '0', left: '0', width: '100%', height: '100%',
+    backgroundColor: '#05050a', zIndex: '999999', display: 'flex',
+    flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+    opacity: '0', transition: 'opacity 0.8s ease-out', overflow: 'hidden'
+  });
+
+  const canvasContainer = document.createElement('div');
+  Object.assign(canvasContainer.style, {
+    position: 'absolute', top: '0', left: '0', width: '100%', height: '100%'
+  });
+  overlay.appendChild(canvasContainer);
 
   const textContainer = document.createElement('div');
-  textContainer.style.position = 'absolute';
-  textContainer.style.zIndex = '2';
-  textContainer.style.bottom = '20%';
-  textContainer.style.left = '50%';
-  textContainer.style.transform = 'translateX(-50%) translateY(40px)';
-  textContainer.style.opacity = '0';
-  textContainer.style.color = '#fff';
-  textContainer.style.fontFamily = '"Space Grotesk", var(--sans), sans-serif';
-  textContainer.style.textAlign = 'center';
-  textContainer.style.transition = 'all 1.2s cubic-bezier(0.16, 1, 0.3, 1)';
+  Object.assign(textContainer.style, {
+    position: 'absolute', zIndex: '2', bottom: '20%', left: '50%',
+    transform: 'translateX(-50%) translateY(40px)', opacity: '0',
+    color: '#fff', fontFamily: '"Space Grotesk", var(--sans), sans-serif',
+    textAlign: 'center', transition: 'all 1.2s cubic-bezier(0.16, 1, 0.3, 1)'
+  });
   
   const curLang = document.querySelector('.lang-btn.active')?.dataset.lang || 'uz';
   const curT = (typeof T !== 'undefined' && T[curLang]) || {};
@@ -621,191 +618,168 @@ function showSuccess3DAnimation(messageText) {
       <span style="display:inline-block; width: 6px; height: 6px; background: #4ade80; border-radius: 50%; box-shadow: 0 0 12px 2px #4ade80; animation: pulse3d 2s infinite;"></span>
       <span>${subText}</span>
     </div>
-    <style>
-      @keyframes pulse3d { 0% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.5); } 100% { opacity: 0.5; transform: scale(1); } }
-    </style>
+    <style>@keyframes pulse3d { 0% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.5); } 100% { opacity: 0.5; transform: scale(1); } }</style>
   `;
   overlay.appendChild(textContainer);
   document.body.appendChild(overlay);
 
-  requestAnimationFrame(() => {
-    overlay.style.opacity = '1';
+  requestAnimationFrame(() => overlay.style.opacity = '1');
+
+  // THREE.JS SETUP
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x05050a, 0.002);
+  
+  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.position.z = 30;
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(window.devicePixelRatio);
+  canvasContainer.appendChild(renderer.domElement);
+
+  // LIGHTS
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+  scene.add(ambientLight);
+  const pointLight = new THREE.PointLight(0x4ade80, 2, 100);
+  pointLight.position.set(0, 0, 10);
+  scene.add(pointLight);
+
+  // 3D CHECKMARK
+  const checkGroup = new THREE.Group();
+  
+  const shape = new THREE.Shape();
+  shape.moveTo(-2, 0);
+  shape.lineTo(-0.5, -1.5);
+  shape.lineTo(3, 2);
+  shape.lineTo(2.2, 2.7);
+  shape.lineTo(-0.5, 0);
+  shape.lineTo(-1.3, 0.8);
+  shape.lineTo(-2, 0);
+  
+  const extrudeSettings = { depth: 1, bevelEnabled: true, bevelSegments: 3, steps: 2, bevelSize: 0.2, bevelThickness: 0.2 };
+  const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+  geometry.center();
+  
+  const material = new THREE.MeshStandardMaterial({ 
+    color: 0x4ade80, emissive: 0x22c55e, emissiveIntensity: 0.5,
+    metalness: 0.8, roughness: 0.2, wireframe: false
   });
+  const checkMesh = new THREE.Mesh(geometry, material);
+  checkMesh.scale.set(0.01, 0.01, 0.01);
+  checkGroup.add(checkMesh);
 
-  const ctx = canvas.getContext('2d', { alpha: false });
-  let w, h, cx, cy;
-  let mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
-  let isInit = true;
+  // Glowing rings around checkmark
+  const ringGeo1 = new THREE.TorusGeometry(8, 0.1, 16, 100);
+  const ringMat1 = new THREE.MeshBasicMaterial({ color: 0x4ade80, transparent: true, opacity: 0.5 });
+  const ring1 = new THREE.Mesh(ringGeo1, ringMat1);
+  checkGroup.add(ring1);
+  
+  const ringGeo2 = new THREE.TorusGeometry(10, 0.05, 16, 100);
+  const ring2 = new THREE.Mesh(ringGeo2, ringMat1);
+  ring2.rotation.x = Math.PI / 2;
+  checkGroup.add(ring2);
 
-  function resize() {
-    w = window.innerWidth;
-    h = window.innerHeight;
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = w * dpr;
-    canvas.height = h * dpr;
-    canvas.style.width = w + 'px';
-    canvas.style.height = h + 'px';
-    ctx.scale(dpr, dpr);
-    cx = w / 2;
-    cy = h / 2 - 40;
-    if (isInit) {
-      mouse.x = cx;
-      mouse.y = cy;
-      mouse.targetX = cx;
-      mouse.targetY = cy;
-      isInit = false;
-    }
+  scene.add(checkGroup);
+
+  // STARS / PARTICLES
+  const starsGeo = new THREE.BufferGeometry();
+  const starsCount = 2000;
+  const posArray = new Float32Array(starsCount * 3);
+  const colorsArray = new Float32Array(starsCount * 3);
+  
+  for(let i = 0; i < starsCount * 3; i+=3) {
+    posArray[i] = (Math.random() - 0.5) * 200;
+    posArray[i+1] = (Math.random() - 0.5) * 200;
+    posArray[i+2] = (Math.random() - 0.5) * 400 - 100;
+    
+    colorsArray[i] = 0.2 + Math.random()*0.3;
+    colorsArray[i+1] = 0.8 + Math.random()*0.2;
+    colorsArray[i+2] = 0.5 + Math.random()*0.5;
   }
-  window.addEventListener('resize', resize);
-  resize();
+  
+  starsGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+  starsGeo.setAttribute('color', new THREE.BufferAttribute(colorsArray, 3));
+  
+  const starsMat = new THREE.PointsMaterial({
+    size: 0.5, vertexColors: true, transparent: true, opacity: 0.8,
+    blending: THREE.AdditiveBlending
+  });
+  const starMesh = new THREE.Points(starsGeo, starsMat);
+  scene.add(starMesh);
 
-  function onMouseMove(e) {
-    mouse.targetX = e.clientX;
-    mouse.targetY = e.clientY;
+  let mouseX = 0;
+  let mouseY = 0;
+  const onMouseMove = (e) => {
+    mouseX = (e.clientX - window.innerWidth/2) * 0.05;
+    mouseY = (e.clientY - window.innerHeight/2) * 0.05;
   }
   window.addEventListener('mousemove', onMouseMove);
   
-  function onTouchMove(e) {
+  const onTouchMove = (e) => {
     if(e.touches.length > 0) {
-      mouse.targetX = e.touches[0].clientX;
-      mouse.targetY = e.touches[0].clientY;
+      mouseX = (e.touches[0].clientX - window.innerWidth/2) * 0.05;
+      mouseY = (e.touches[0].clientY - window.innerHeight/2) * 0.05;
     }
   }
   window.addEventListener('touchmove', onTouchMove, { passive: true });
 
-  // Galaxy Particles
-  const particles = [];
-  const particleCount = 2500;
-  const arms = 5;
-  const armSpread = 0.6;
-  const colors = ['#4ade80', '#14b8a6', '#2dd4bf', '#ffffff', '#0f766e'];
-
-  for (let i = 0; i < particleCount; i++) {
-    const r = Math.random() * 450;
-    const armAngle = (Math.floor(Math.random() * arms) * (Math.PI * 2)) / arms;
-    const offset = (Math.random() - 0.5) * armSpread * r;
-    const angle = armAngle + (r * 0.015) + offset / 100;
-
-    particles.push({
-      r: r,
-      angle: angle,
-      size: Math.random() * 1.5 + 0.5,
-      speed: (Math.random() * 0.005 + 0.001) * (500 / (r + 50)),
-      color: colors[Math.floor(Math.random() * colors.length)],
-      baseY: (Math.random() - 0.5) * (1500 / (r + 10)),
-      phase: Math.random() * Math.PI * 2
-    });
+  const resize = () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
   }
-
-  // Core glow particle
-  const coreParticles = [];
-  for (let i = 0; i < 50; i++) {
-    coreParticles.push({
-      x: (Math.random() - 0.5) * 40,
-      y: (Math.random() - 0.5) * 40,
-      z: (Math.random() - 0.5) * 40,
-      size: Math.random() * 3 + 1,
-      color: '#4ade80',
-      speedX: (Math.random() - 0.5) * 0.5,
-      speedY: (Math.random() - 0.5) * 0.5,
-      speedZ: (Math.random() - 0.5) * 0.5
-    });
-  }
+  window.addEventListener('resize', resize);
 
   let startTime = Date.now();
   let animationFrameId;
-  const fov = 700;
   let isDestroyed = false;
 
   function animate() {
     if (isDestroyed) return;
-    let now = Date.now();
-    let elapsed = now - startTime;
+    animationFrameId = requestAnimationFrame(animate);
+    
+    let elapsed = Date.now() - startTime;
+    
+    // Camera mouse pan
+    camera.position.x += (mouseX - camera.position.x) * 0.05;
+    camera.position.y += (-mouseY - camera.position.y) * 0.05;
+    camera.lookAt(scene.position);
 
-    mouse.x += (mouse.targetX - mouse.x) * 0.05;
-    mouse.y += (mouse.targetY - mouse.y) * 0.05;
+    // Stars warp effect
+    const positions = starMesh.geometry.attributes.position.array;
+    let warpSpeed = Math.max(0.5, 15 - elapsed * 0.01);
+    
+    for(let i = 2; i < starsCount * 3; i += 3) {
+      positions[i] += warpSpeed;
+      if (positions[i] > 50) {
+        positions[i] -= 400;
+      }
+    }
+    starMesh.geometry.attributes.position.needsUpdate = true;
+    starMesh.rotation.z += 0.002;
 
-    // Trail effect
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.fillStyle = 'rgba(5, 5, 10, 0.18)';
-    ctx.fillRect(0, 0, w, h);
-
-    ctx.globalCompositeOperation = 'lighter';
-
-    if (elapsed > 1000) {
+    // Checkmark animation
+    if (elapsed > 800) {
       textContainer.style.opacity = '1';
       textContainer.style.transform = 'translateX(-50%) translateY(0)';
-    }
-
-    // Dynamic rotation based on mouse and time
-    let rotX = (mouse.y - cy) * 0.0015 + Math.PI / 3;
-    let rotY = elapsed * 0.0003 + (mouse.x - cx) * 0.0015;
-
-    // Draw Core Particles
-    for (let i = 0; i < coreParticles.length; i++) {
-      const p = coreParticles[i];
-      p.x += p.speedX; p.y += p.speedY; p.z += p.speedZ;
-      // bound core
-      if(p.x > 30 || p.x < -30) p.speedX *= -1;
-      if(p.y > 30 || p.y < -30) p.speedY *= -1;
-      if(p.z > 30 || p.z < -30) p.speedZ *= -1;
-
-      let y1 = p.y * Math.cos(rotX) - p.z * Math.sin(rotX);
-      let z1 = p.y * Math.sin(rotX) + p.z * Math.cos(rotX);
-      let x1 = p.x * Math.cos(rotY) - z1 * Math.sin(rotY);
-      z1 = p.x * Math.sin(rotY) + z1 * Math.cos(rotY);
-
-      let zOffset = z1 + 600;
-      if (zOffset < 1) zOffset = 1;
-      let scale = fov / zOffset;
-      let sx = x1 * scale + cx;
-      let sy = y1 * scale + cy;
-
-      ctx.fillStyle = p.color;
-      ctx.globalAlpha = 0.6;
-      ctx.beginPath();
-      ctx.arc(sx, sy, p.size * scale * 2, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    // Draw Galaxy Particles
-    for (let i = 0; i < particleCount; i++) {
-      const p = particles[i];
-      p.angle += p.speed;
       
-      let py = p.baseY + Math.sin(elapsed * 0.002 + p.phase) * 15;
-      const px = Math.cos(p.angle) * p.r;
-      const pz = Math.sin(p.angle) * p.r;
-
-      let y1 = py * Math.cos(rotX) - pz * Math.sin(rotX);
-      let z1 = py * Math.sin(rotX) + pz * Math.cos(rotX);
-      let x1 = px * Math.cos(rotY) - z1 * Math.sin(rotY);
-      z1 = px * Math.sin(rotY) + z1 * Math.cos(rotY);
-
-      let zOffset = z1 + 600;
-      if (zOffset < 1) zOffset = 1;
-
-      let scale = fov / zOffset;
-      let sx = x1 * scale + cx;
-      let sy = y1 * scale + cy;
-
-      const alpha = Math.min(1, Math.max(0, (1200 - zOffset) / 1000));
-      ctx.fillStyle = p.color;
-      ctx.globalAlpha = alpha * (p.r < 100 ? 0.8 : 0.5);
+      let scaleTarget = 1.5;
+      checkMesh.scale.x += (scaleTarget - checkMesh.scale.x) * 0.1;
+      checkMesh.scale.y += (scaleTarget - checkMesh.scale.y) * 0.1;
+      checkMesh.scale.z += (scaleTarget - checkMesh.scale.z) * 0.1;
       
-      ctx.beginPath();
-      ctx.arc(sx, sy, p.size * scale, 0, Math.PI * 2);
-      ctx.fill();
+      checkGroup.rotation.y += 0.02;
+      ring1.rotation.x += 0.01;
+      ring1.rotation.y += 0.02;
+      ring2.rotation.y += 0.015;
+      ring2.rotation.z += 0.01;
     }
-    ctx.globalAlpha = 1.0;
 
-    animationFrameId = requestAnimationFrame(animate);
+    renderer.render(scene, camera);
   }
   animate();
 
-  let cleanupTimer;
-  let fadeOutTimer;
-
+  let cleanupTimer, fadeOutTimer;
   function cleanup() {
     if (isDestroyed) return;
     isDestroyed = true;
@@ -816,16 +790,20 @@ function showSuccess3DAnimation(messageText) {
     window.removeEventListener('mousemove', onMouseMove);
     window.removeEventListener('touchmove', onTouchMove);
     if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+    
+    renderer.dispose();
+    geometry.dispose();
+    material.dispose();
+    ringGeo1.dispose();
+    ringGeo2.dispose();
+    ringMat1.dispose();
+    starsGeo.dispose();
+    starsMat.dispose();
   }
-
   overlay.__cleanup = cleanup;
 
   fadeOutTimer = setTimeout(() => {
     overlay.style.opacity = '0';
-    cleanupTimer = setTimeout(() => {
-      cleanup();
-    }, 800);
+    cleanupTimer = setTimeout(cleanup, 800);
   }, 6000);
 }
-
-
