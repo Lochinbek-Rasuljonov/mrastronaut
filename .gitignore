@@ -12,3 +12,5 @@ test_browser_overflow_and_ui.py
 verify_localization.py
 test_nav_and_grammar.py
 verify_uzbek_orthography_suite.py
+test_*.py
+test_*.js
