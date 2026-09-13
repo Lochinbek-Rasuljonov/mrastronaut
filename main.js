@@ -557,3 +557,29 @@ if (dd) {
     }
   });
 }
+
+// Music Toggle Logic
+document.addEventListener('DOMContentLoaded', () => {
+  const musicToggle = document.getElementById('music-toggle');
+  const bgMusic = document.getElementById('bg-music');
+  
+  if (musicToggle && bgMusic) {
+    // Set low volume
+    bgMusic.volume = 0.3;
+    
+    musicToggle.addEventListener('click', () => {
+      if (bgMusic.paused) {
+        bgMusic.play().then(() => {
+          musicToggle.classList.add('playing');
+          musicToggle.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+        }).catch(err => {
+          console.error('Audio play failed:', err);
+        });
+      } else {
+        bgMusic.pause();
+        musicToggle.classList.remove('playing');
+        musicToggle.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+      }
+    });
+  }
+});
