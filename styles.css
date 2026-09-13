@@ -756,3 +756,23 @@ html[lang="uz-Cyrl"] .headline {
   border-color: rgba(180, 100, 255, 0.4);
   color: #b464ff;
 }
+
+/* --- Inline Style Replacements for CSP --- */
+.li-idx-0 { --li: 0; }
+.li-idx-1 { --li: 1; }
+.li-idx-2 { --li: 2; }
+.li-idx-3 { --li: 3; }
+.li-idx-4 { --li: 4; }
+.li-idx-5 { --li: 5; }
+
+.delay-12 { --d: .12s; }
+.delay-28 { --d: .28s; }
+.delay-32 { --d: .32s; }
+.delay-42 { --d: .42s; }
+.delay-50 { --d: .5s; }
+.delay-58 { --d: .58s; }
+.delay-66 { --d: .66s; }
+.delay-74 { --d: .74s; }
+
+.anim-d-30 { animation-delay: .3s; }
+.anim-d-60 { animation-delay: .6s; }
