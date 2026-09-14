@@ -533,6 +533,7 @@ html[lang="uz-Cyrl"] .headline {
 }
 .svc-icon {
   font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
+  font-weight: 900 !important;
   font-size: 22px !important;
   color: #fff !important;
   z-index: 2;
