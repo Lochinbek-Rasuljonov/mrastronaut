@@ -4,16 +4,14 @@ export function normalizeUzbekOrthography(text) {
   let res = text.replace(/«([^«»\r\n]+)»/g, '“$1”');
   res = res.replace(/"([^"\r\n]+)"/g, '“$1”');
 
-  // 2. Oʻ, oʻ, Gʻ, gʻ with left curly apostrophe ʻ (U+2018)
-  // Followed by letters (oʻz, gʻoya) or word boundary/whitespace/punctuation (togʻ, bogʻ)
-  res = res.replace(/([OoGg])['`ʼʻʼ´](?=[a-zA-Z\u0400-\u04FF]|\s|[.,!?;:)]|$)/g, (m, p1) => p1 + 'ʻ');
+  // 2. Oʻ/Gʻ (any apostrophe variant) → Ō ō Ḡ ḡ (yangi alifbo)
+  // Followed by letters (oʻz → ōz, gʻoya → ḡoya) or word boundary/whitespace/punctuation (togʻ → toḡ)
+  const MACRON = { O: 'Ō', o: 'ō', G: 'Ḡ', g: 'ḡ' };
+  res = res.replace(/([OoGg])['`ʻ‘’´](?=[a-zA-Z\u00C0-\u024F\u1E00-\u1EFF\u0400-\u04FF]|\s|[.,!?;:)]|$)/g, (m, p1) => MACRON[p1]);
 
-  // 3. Tutuq belgisi with right curly apostrophe ʼ (U+2019)
-  // Between letters (except O/G handled above): maʼlumot, sanʼat, masʼul, taʼminlash, etc.
-  res = res.replace(/([a-zA-Z\u0400-\u04FF])['`ʻʻʼ´]([a-zA-Z\u0400-\u04FF])/g, (m, p1, p2) => {
-    if (/^[og]$/i.test(p1)) return p1 + 'ʻ' + p2;
-    return p1 + 'ʼ' + p2;
-  });
+  // 3. Tutuq belgisi with right curly apostrophe ʼ (U+02BC)
+  // Between letters: maʼlumot, sanʼat, masʼul, taʼminlaş, etc.
+  res = res.replace(/([a-zA-Z\u00C0-\u024F\u1E00-\u1EFF\u0400-\u04FF])['`ʻ‘’´]([a-zA-Z\u00C0-\u024F\u1E00-\u1EFF\u0400-\u04FF])/g, '$1ʼ$2');
 
   return res;
 }
@@ -35,16 +33,16 @@ export default async function handler(req, res) {
   const INCEPTION_API_KEY = (process.env.INCEPTION_API_KEY || '***REMOVED***').trim();
 
   if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
-    console.error('Missing config'); return res.status(500).json({ error: 'Serverda vaqtinchalik nosozlik yuz berdi. Iltimos, birozdan soʻng qayta urinib koʻring.' });
+    console.error('Missing config'); return res.status(500).json({ error: 'Serverda vaqtinçalik nosozlik yuz berdi. Iltimos, birozdan sōng qayta urinib kōring.' });
   }
 
   const { name, contact, service, budget, message } = req.body || {};
 
   if (!name || !name.trim()) {
-    return res.status(400).json({ error: 'Ism kiritilishi shart' });
+    return res.status(400).json({ error: 'Ism kiritilişi şart' });
   }
   if (!contact || !contact.trim()) {
-    return res.status(400).json({ error: 'Telegram aloqa maʼlumoti kiritilishi shart' });
+    return res.status(400).json({ error: 'Telegram aloqa maʼlumoti kiritilişi şart' });
   }
   const invalidServicePlaceholders = [
     'tanlanmadi',
@@ -54,16 +52,16 @@ export default async function handler(req, res) {
     'select a service...'
   ];
   if (!service || !service.trim() || invalidServicePlaceholders.includes(service.trim().toLowerCase())) {
-    return res.status(400).json({ error: 'Xizmat turi tanlanishi shart' });
+    return res.status(400).json({ error: 'Xizmat turi tanlanişi şart' });
   }
   if (!budget || !budget.trim()) {
-    return res.status(400).json({ error: 'Taxminiy byudjet kiritilishi shart' });
+    return res.status(400).json({ error: 'Taxminiy byudjet kiritilişi şart' });
   }
   if (!message || !message.trim()) {
-    return res.status(400).json({ error: 'Loyiha haqida xabar kiritilishi shart' });
+    return res.status(400).json({ error: 'Loyiha haqida xabar kiritilişi şart' });
   }
   if (message.trim().length < 20) {
-    return res.status(400).json({ error: 'Loyiha haqida xabar kamida 20 ta harfdan iborat boʻlishi kerak' });
+    return res.status(400).json({ error: 'Loyiha haqida xabar kamida 20 ta harfdan iborat bōlişi kerak' });
   }
 
   const cleanName = name.trim().slice(0, 100);
@@ -92,16 +90,16 @@ export default async function handler(req, res) {
   let aiAnalysis = '<i>AI tahlili mavjud emas.</i>';
   try {
     const aiPrompt = `Siz qobiliyatli IT konsultantsiz. MrAstronaut ismli frilanserga yordam beryapsiz.
-Yangi mijoz quyidagi loyiha soʻrovini yubordi:
+Yangi mijoz quyidagi loyiha sōrovini yubordi:
 - Xizmat turi: ${cleanService}
 - Byudjet: ${cleanBudget}
 - Mijozning xabari: ${cleanMessage}
 
-Iltimos, ushbu mijoz soʻrovini tahlil qilib, qisqa 3–4 ta band (nuqtachalar) bilan quyidagilarni oʻzbek tilida yozing:
-1. Loyiha uchun qaysi texnologiyalar (Tech Stack) eng mos keladi?
-2. Boshlangʻich narxni qanday aytish va qanday sotish strategiyasini qoʻllash kerak?
+Iltimos, uşbu mijoz sōrovini tahlil qilib, qisqa 3–4 ta band (nuqtaçalar) bilan quyidagilarni ōzbek tilida yozing:
+1. Loyiha uçun qaysi texnologiyalar (Tech Stack) eng mos keladi?
+2. Boşlanḡiç narxni qanday aytiş va qanday sotiş strategiyasini qōllaş kerak?
 3. Mijozning xabaridagi asosiy xavf yoki talab nima?
-Faqat aniq faktlar va maslahat boʻlsin. Hech qanday salomlashishsiz, toʻgʻridan-toʻgʻri tahlilni yozing. QATʼIY QOIDA: Oʻzbek tili grammatikasi va imlo qoidalariga 100% amal qiling. Oʻ va Gʻ harflarida har doim toʻgʻri chapga egilgan apostrof belgisini ishlating (Oʻ, oʻ, Gʻ, gʻ). Ularni oddiy toʻgʻri tutuq belgisi yoki birikmali tirnoqlar bilan almashtirmang. Tutuq belgisini (ʼ) oʻz oʻrnida va toʻgʻri shaklda qoʻllang. Matndagi barcha iqtibos va nomlarni standart qoʻshtirnoqlar (“...”) ichida bering. Har bir gap va soʻz grammatik jihatdan benuqson boʻlsin.`;
+Faqat aniq faktlar va maslahat bōlsin. Heç qanday salomlaşişsiz, tōḡridan-tōḡri tahlilni yozing. QATʼIY QOIDA: Ōzbek tili grammatikasi va imlo qoidalariga 100% amal qiling. Faqat yangi ōzbek lotin alifbosida yozing: oʻ, gʻ, sh, ch ōrniga har doim Ō ō, Ḡ ḡ, Ş ş, Ç ç harflarini qōllang (masalan: “ōzbek”, “tōḡri”, “işlaş”, “uçun”). Tutuq belgisini (ʼ) ōz ōrnida va tōḡri şaklda qōllang. Matndagi barça iqtibos va nomlarni standart qōştirnoqlar (“...”) içida bering. Har bir gap va sōz grammatik jihatdan benuqson bōlsin.`;
 
     const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
     const timeout = controller ? setTimeout(() => controller.abort(), 4000) : null;
@@ -159,20 +157,20 @@ Faqat aniq faktlar va maslahat boʻlsin. Hech qanday salomlashishsiz, toʻgʻrid
 💼 <b>Xizmat turi:</b> ${safeService}
 💰 <b>Byudjet:</b> ${safeBudget}
 
-📝 <b>Qisqacha maʼlumot:</b>
+📝 <b>Qisqaça maʼlumot:</b>
 <i>${safeMessage}</i>
 
-🤖 <b>AI Yordamchi Tahlili:</b>
+🤖 <b>AI Yordamçi Tahlili:</b>
 ${aiAnalysis}
   `.trim();
 
   const inlineKeyboard = [];
   if (contactUrl) {
-    inlineKeyboard.push([ { text: '✉️ Mijozga yozish', url: contactUrl } ]);
+    inlineKeyboard.push([ { text: '✉️ Mijozga yoziş', url: contactUrl } ]);
   }
   inlineKeyboard.push([
-    { text: '✅ Qabul qilish', callback_data: 'status_accepted' },
-    { text: '❌ Rad etish', callback_data: 'status_rejected' }
+    { text: '✅ Qabul qiliş', callback_data: 'status_accepted' },
+    { text: '❌ Rad etiş', callback_data: 'status_rejected' }
   ]);
 
   try {
@@ -194,9 +192,9 @@ ${aiAnalysis}
       return res.status(200).json({ success: true });
     } else {
       console.error('Telegram API error:', data);
-      return res.status(502).json({ error: 'Xizmat vaqtincha faol emas. Iltimos, keyinroq urinib koʻring.' });
+      return res.status(502).json({ error: 'Xizmat vaqtinça faol emas. Iltimos, keyinroq urinib kōring.' });
     }
   } catch (error) {
-    return res.status(500).json({ error: 'Xabarni yuborishda xatolik yuz berdi' });
+    return res.status(500).json({ error: 'Xabarni yuborişda xatolik yuz berdi' });
   }
 }

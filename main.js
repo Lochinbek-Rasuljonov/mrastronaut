@@ -222,7 +222,7 @@ function showToast(isSuccess=true, customMsg=null){
   const textEl=toast.querySelector('.toast-text')||toast.querySelector('span:last-child');
 
   if(isSuccess){
-    const msg = curT['toast_msg']||(typeof T!=='undefined'&&T.uz&&T.uz['toast_msg'])||'Xabaringiz muvaffaqiyatli yuborildi! Tez orada bogʻlanamiz.';
+    const msg = curT['toast_msg']||(typeof T!=='undefined'&&T.uz&&T.uz['toast_msg'])||'Xabaringiz muvaffaqiyatli yuborildi! Tez orada boḡlanamiz.';
     toast.classList.remove('is-error');
     if(iconEl)iconEl.innerHTML='<svg class="toast-svg" viewBox="0 0 512 512" fill="currentColor" aria-hidden="true"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"/></svg>';
     if(textEl){
@@ -234,7 +234,7 @@ function showToast(isSuccess=true, customMsg=null){
     if(iconEl)iconEl.innerHTML='<svg class="toast-svg" viewBox="0 0 512 512" fill="currentColor" aria-hidden="true"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm0-384c13.3 0 24 10.7 24 24V264c0 13.3-10.7 24-24 24s-24-10.7-24-24V152c0-13.3 10.7-24 24-24zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"/></svg>';
     if(textEl){
       textEl.dataset.key='toast_err';
-      textEl.textContent=customMsg || curT['toast_err']||(typeof T!=='undefined'&&T.uz&&T.uz['toast_err'])||'Xatolik yuz berdi. Iltimos, qayta urinib koʻring.';
+      textEl.textContent=customMsg || curT['toast_err']||(typeof T!=='undefined'&&T.uz&&T.uz['toast_err'])||'Xatolik yuz berdi. Iltimos, qayta urinib kōring.';
     }
   }
 
@@ -350,10 +350,10 @@ if(form){
       const ct = resp.headers.get('content-type') || '';
 
       if (resp.redirected) {
-        customErrorMsg = 'Tarmoq xatosi yoki ruxsat yoʻq. Iltimos, keyinroq urinib koʻring.';
+        customErrorMsg = 'Tarmoq xatosi yoki ruxsat yōq. Iltimos, keyinroq urinib kōring.';
         isOk = false;
       } else if (resp.status === 401 || resp.status === 403) {
-        customErrorMsg = 'Ruxsat berilmagan. Iltimos, keyinroq urinib koʻring.';
+        customErrorMsg = 'Ruxsat berilmagan. Iltimos, keyinroq urinib kōring.';
         isOk = false;
       } else if (resp.ok) {
         if (ct.includes('application/json')) {
@@ -365,7 +365,7 @@ if(form){
             customErrorMsg = data?.error || 'Serverda kutilmagan xatolik yuz berdi.';
           }
         } else {
-          customErrorMsg = 'Serverdan kutilmagan javob keldi. Iltimos, keyinroq urinib koʻring.';
+          customErrorMsg = 'Serverdan kutilmagan javob keldi. Iltimos, keyinroq urinib kōring.';
           isOk = false;
         }
       } else {
@@ -373,7 +373,7 @@ if(form){
           const errData = await resp.json().catch(() => null);
           customErrorMsg = errData?.error || 'Server xatosi yuz berdi.';
         } else if (ct.includes('text/html')) {
-          customErrorMsg = 'Server vaqtincha javob bermadi. Iltimos, keyinroq urinib koʻring.';
+          customErrorMsg = 'Server vaqtinça javob bermadi. Iltimos, keyinroq urinib kōring.';
         } else {
           customErrorMsg = `Xatolik yuz berdi (Status: ${resp.status}). Iltimos, keyinroq urinib koring.`;
         }
@@ -382,7 +382,7 @@ if(form){
     } catch(err) {
       console.error('Fetch error:', err);
       if (err.name === 'AbortError') {
-        customErrorMsg = 'Soʻrov vaqti tugadi (Timeout). Iltimos, qayta urinib koʻring.';
+        customErrorMsg = 'Sōrov vaqti tugadi (Timeout). Iltimos, qayta urinib kōring.';
       } else {
         customErrorMsg = 'Tarmoq xatosi yuz berdi. Iltimos, keyinroq urinib koring.';
       }
@@ -394,7 +394,7 @@ if(form){
     const finishT = (typeof T !== 'undefined' && T[finishLang]) || {};
     if (btnSpan) {
       btnSpan.dataset.key = 'f_submit';
-      btnSpan.textContent = finishT['f_submit'] || (typeof T !== 'undefined' && T.uz && T.uz['f_submit']) || 'Xabar yuborish →';
+      btnSpan.textContent = finishT['f_submit'] || (typeof T !== 'undefined' && T.uz && T.uz['f_submit']) || 'Xabar yuboriş →';
     }
     
     if (isOk) {
@@ -414,7 +414,7 @@ if(form){
       showToast(true);
     } else {
       if (!customErrorMsg) {
-        customErrorMsg = curT['toast_err'] || (typeof T !== 'undefined' && T.uz && T.uz['toast_err']) || 'Xatolik yuz berdi. Iltimos, qayta urinib koʻring.';
+        customErrorMsg = curT['toast_err'] || (typeof T !== 'undefined' && T.uz && T.uz['toast_err']) || 'Xatolik yuz berdi. Iltimos, qayta urinib kōring.';
       }
       showToast(false, customErrorMsg);
     }

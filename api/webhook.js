@@ -4,16 +4,14 @@ export function normalizeUzbekOrthography(text) {
   let res = text.replace(/«([^«»\r\n]+)»/g, '“$1”');
   res = res.replace(/"([^"\r\n]+)"/g, '“$1”');
 
-  // 2. Oʻ, oʻ, Gʻ, gʻ with left curly apostrophe ʻ (U+2018)
-  // Followed by letters (oʻz, gʻoya) or word boundary/whitespace/punctuation (togʻ, bogʻ)
-  res = res.replace(/([OoGg])['`ʼʻʼ´](?=[a-zA-Z\u0400-\u04FF]|\s|[.,!?;:)]|$)/g, (m, p1) => p1 + 'ʻ');
+  // 2. Oʻ/Gʻ (any apostrophe variant) → Ō ō Ḡ ḡ (yangi alifbo)
+  // Followed by letters (oʻz → ōz, gʻoya → ḡoya) or word boundary/whitespace/punctuation (togʻ → toḡ)
+  const MACRON = { O: 'Ō', o: 'ō', G: 'Ḡ', g: 'ḡ' };
+  res = res.replace(/([OoGg])['`ʻ‘’´](?=[a-zA-Z\u00C0-\u024F\u1E00-\u1EFF\u0400-\u04FF]|\s|[.,!?;:)]|$)/g, (m, p1) => MACRON[p1]);
 
-  // 3. Tutuq belgisi with right curly apostrophe ʼ (U+2019)
-  // Between letters (except O/G handled above): maʼlumot, sanʼat, masʼul, taʼminlash, etc.
-  res = res.replace(/([a-zA-Z\u0400-\u04FF])['`ʻʻʼ´]([a-zA-Z\u0400-\u04FF])/g, (m, p1, p2) => {
-    if (/^[og]$/i.test(p1)) return p1 + 'ʻ' + p2;
-    return p1 + 'ʼ' + p2;
-  });
+  // 3. Tutuq belgisi with right curly apostrophe ʼ (U+02BC)
+  // Between letters: maʼlumot, sanʼat, masʼul, taʼminlaş, etc.
+  res = res.replace(/([a-zA-Z\u00C0-\u024F\u1E00-\u1EFF\u0400-\u04FF])['`ʻ‘’´]([a-zA-Z\u00C0-\u024F\u1E00-\u1EFF\u0400-\u04FF])/g, '$1ʼ$2');
 
   return res;
 }
@@ -58,24 +56,24 @@ export default async function handler(req, res) {
       alertText = '✅ Loyiha qabul qilindi!';
       newKeyboard = [
         [ { text: '🟢 HOLAT: QABUL QILINDI (Kutilmoqda)', callback_data: 'ignore' } ],
-        [ { text: '🚀 Ishni boshlash', callback_data: 'status_started' }, { text: '❌ Bekor qilish', callback_data: 'status_rejected' } ]
+        [ { text: '🚀 Işni boşlaş', callback_data: 'status_started' }, { text: '❌ Bekor qiliş', callback_data: 'status_rejected' } ]
       ];
     } else if (data === 'status_started') {
       alertText = '🚀 Ish boshlandi!';
       newKeyboard = [
         [ { text: '🔵 HOLAT: BAJARILMOQDA (Jarayonda)', callback_data: 'ignore' } ],
-        [ { text: '🏁 Loyihani topshirish', callback_data: 'status_finished' }, { text: '❌ Bekor qilish', callback_data: 'status_rejected' } ]
+        [ { text: '🏁 Loyihani topşiriş', callback_data: 'status_finished' }, { text: '❌ Bekor qiliş', callback_data: 'status_rejected' } ]
       ];
     } else if (data === 'status_finished') {
-      alertText = '🏁 Loyiha tugatildi, toʻlov kutilmoqda!';
+      alertText = '🏁 Loyiha tugatildi, tōlov kutilmoqda!';
       newKeyboard = [
-        [ { text: '🟣 HOLAT: YAKUNLANDI (Toʻlov kutilmoqda)', callback_data: 'ignore' } ],
-        [ { text: '💵 Toʻlov qabul qilindi', callback_data: 'status_paid' } ]
+        [ { text: '🟣 HOLAT: YAKUNLANDI (Tōlov kutilmoqda)', callback_data: 'ignore' } ],
+        [ { text: '💵 Tōlov qabul qilindi', callback_data: 'status_paid' } ]
       ];
     } else if (data === 'status_paid') {
-      alertText = '🏆 Toʻlov olindi. Tabriklaymiz!';
+      alertText = '🏆 Tōlov olindi. Tabriklaymiz!';
       newKeyboard = [
-        [ { text: '🏆 HOLAT: TUGATILDI VA TOʻLOV OLINDI!', callback_data: 'ignore' } ]
+        [ { text: '🏆 HOLAT: TUGATILDI VA TŌLOV OLINDI!', callback_data: 'ignore' } ]
       ];
     } else if (data === 'status_rejected') {
       alertText = '🔴 Bekor qilindi.';
@@ -129,7 +127,7 @@ export default async function handler(req, res) {
     let replyMarkup = null;
 
     if (text === '/start') {
-      replyText = `Salom, janob MrAstronaut! 👨‍🚀\n\nBiz sizning shaxsiy AI yordamchingiz va CRM boshqaruv markazingiz boʻlamiz. Nima xizmat?`;
+      replyText = `Salom, janob MrAstronaut! 👨‍🚀\n\nBiz sizning şaxsiy AI yordamçingiz va CRM boşqaruv markazingiz bōlamiz. Nima xizmat?`;
       replyMarkup = {
         keyboard: [
           [{ text: "💬 AI bilan suhbat" }]
@@ -139,7 +137,7 @@ export default async function handler(req, res) {
       };
     } 
     else if (text === '📊 Statistika') {
-      replyText = "Barcha buyurtmalar toʻgʻridan-toʻgʻri Telegram xabarlari orqali xavfsiz boshqariladi.";
+      replyText = "Barça buyurtmalar tōḡridan-tōḡri Telegram xabarlari orqali xavfsiz boşqariladi.";
     }
     else {
       // AI Chat
@@ -162,7 +160,7 @@ export default async function handler(req, res) {
             model: 'mercury-2',
             reasoning_effort: 'low',
             messages: [
-              { role: 'system', content: "Siz MrAstronautning shaxsiy yordamchisisiz. Qisqa va aniq oʻzbek tilida javob bering. QATʼIY QOIDA: Oʻzbek tili grammatikasi va imlo qoidalariga 100% amal qiling. Oʻ va Gʻ harflarida har doim toʻgʻri chapga egilgan apostrof belgisini ishlating (Oʻ, oʻ, Gʻ, gʻ). Ularni oddiy toʻgʻri tutuq belgisi yoki birikmali tirnoqlar bilan almashtirmang. Tutuq belgisini (ʼ) oʻz oʻrnida va toʻgʻri shaklda qoʻllang. Matndagi barcha iqtibos va nomlarni standart qoʻshtirnoqlar (“...”) ichida bering. Har bir gap va soʻz grammatik jihatdan benuqson boʻlsin." },
+              { role: 'system', content: "Siz MrAstronautning şaxsiy yordamçisisiz. Qisqa va aniq ōzbek tilida javob bering. QATʼIY QOIDA: Ōzbek tili grammatikasi va imlo qoidalariga 100% amal qiling. Faqat yangi ōzbek lotin alifbosida yozing: oʻ, gʻ, sh, ch ōrniga har doim Ō ō, Ḡ ḡ, Ş ş, Ç ç harflarini qōllang (masalan: “ōzbek”, “tōḡri”, “işlaş”, “uçun”). Tutuq belgisini (ʼ) ōz ōrnida va tōḡri şaklda qōllang. Matndagi barça iqtibos va nomlarni standart qōştirnoqlar (“...”) içida bering. Har bir gap va sōz grammatik jihatdan benuqson bōlsin." },
               { role: 'user', content: text }
             ]
           })
@@ -173,10 +171,10 @@ export default async function handler(req, res) {
           let rawAiText = aiData.choices[0].message.content || '';
           replyText = escapeHtml(normalizeUzbekOrthography(rawAiText));
         } else {
-          replyText = "Kechirasiz, AI xizmatida xatolik yuz berdi.";
+          replyText = "Keçirasiz, AI xizmatida xatolik yuz berdi.";
         }
       } catch (e) {
-        replyText = "AIga ulanishda muammo yuz berdi.";
+        replyText = "AIga ulanişda muammo yuz berdi.";
       }
     }
 
