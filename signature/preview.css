@@ -1,0 +1,89 @@
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #21211f;
+  background: #f5f4f0;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+a { color: inherit; }
+button, textarea { font: inherit; }
+
+.workbench {
+  width: min(960px, calc(100% - 64px));
+  margin: 0 auto;
+}
+
+.masthead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  min-height: 88px;
+  border-bottom: 1px solid #d8d7d2;
+}
+
+.masthead__brand {
+  font-family: "MrAstronaut Signature", monospace;
+  font-size: 22px;
+  text-decoration: none;
+}
+
+.masthead__meta, .eyebrow, .surface__label, .surface__note, .guide__label, .page-note {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+}
+
+.masthead__meta { color: #686761; }
+.intro { padding: 46px 0 34px; }
+.eyebrow { margin: 0 0 14px; color: #7443b3; text-transform: uppercase; }
+h1 { margin: 0; font-size: clamp(34px, 5vw, 52px); font-weight: 550; line-height: 1.12; letter-spacing: -0.055em; }
+.intro__description { max-width: 570px; margin: 18px 0 0; color: #62615b; font-size: 15px; line-height: 1.65; }
+
+.surfaces { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.surface { min-width: 0; min-height: 224px; padding: 22px 26px 18px; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid #deddd7; }
+.surface--dark { background: #111112; color: #f4f4f4; border-color: #111112; }
+.surface--light { background: #fff; color: #242425; }
+.surface__label { margin: 0; color: #62615b; text-transform: uppercase; }
+.surface--dark .surface__label, .surface--dark .surface__note { color: #b1b1b5; }
+.surface__mark { display: flex; justify-content: center; padding: 24px 0; }
+.surface__note { margin: 0; padding-top: 15px; color: #62615b; border-top: 1px solid #e6e5e0; font-weight: 400; letter-spacing: 0.02em; }
+.surface--dark .surface__note { border-color: #333335; }
+
+.guide { padding: 32px 0 0; }
+.guide__header { display: flex; gap: 20px; align-items: end; justify-content: space-between; margin-bottom: 14px; }
+.guide__label { margin: 0 0 8px; color: #62615b; text-transform: uppercase; }
+h2 { margin: 0; font-size: 22px; font-weight: 550; letter-spacing: -0.035em; }
+.copy-button { flex-shrink: 0; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 10px 14px; background: #21211f; color: #fff; border: 1px solid #21211f; border-radius: 3px; font-size: 12px; cursor: pointer; }
+.copy-button:hover { background: #3a3935; }
+.copy-button:active { background: #111; }
+.copy-button[hidden] { display: none; }
+.copy-button svg { width: 14px; height: 14px; }
+.embed-code { display: block; width: 100%; height: 136px; resize: vertical; border: 1px solid #d8d7d2; border-radius: 3px; padding: 15px 17px; background: #eeede8; color: #45443f; font: 11px/1.65 ui-monospace, SFMono-Regular, Consolas, monospace; white-space: pre; }
+.steps { margin: 16px 0 0; padding-left: 19px; color: #62615b; font-size: 13px; line-height: 1.85; }
+.steps code { color: #33322f; font-size: 12px; }
+.steps a { text-underline-offset: 3px; }
+.copy-status { min-height: 18px; margin: 9px 0 0; color: #62615b; font-size: 12px; }
+.page-note { display: flex; justify-content: space-between; gap: 20px; margin: 12px 0 0; padding: 18px 0 24px; border-top: 1px solid #d8d7d2; color: #62615b; font-weight: 400; letter-spacing: 0.01em; }
+.page-note a { text-underline-offset: 3px; }
+:is(a, button, textarea):focus-visible { outline: 2px solid #9460df; outline-offset: 4px; }
+
+@media (max-width: 600px) {
+  .workbench { width: calc(100% - 36px); }
+  .masthead { min-height: 72px; }
+  .masthead__meta { font-size: 9px; letter-spacing: 0.06em; }
+  .intro { padding: 34px 0 26px; }
+  .intro__description { font-size: 14px; margin-top: 14px; }
+  .surfaces { grid-template-columns: 1fr; gap: 12px; }
+  .surface { min-height: 196px; padding: 18px 22px 16px; }
+  .surface__mark { padding: 19px 0; }
+  .guide { padding-top: 26px; }
+  .guide__header { align-items: center; gap: 12px; }
+  h2 { font-size: 20px; }
+  .copy-button { font-size: 11px; padding: 10px; gap: 6px; }
+  .embed-code { height: 160px; padding: 13px; }
+  .page-note { font-size: 10px; gap: 12px; }
+}

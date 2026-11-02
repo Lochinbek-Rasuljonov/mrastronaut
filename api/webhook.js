@@ -1,19 +1,24 @@
 export function normalizeUzbekOrthography(text) {
   if (!text) return text;
-  // 1. Convert paired quotation marks: "..." and «...» to standard “...” (U+201C / U+201D)
-  let res = text.replace(/«([^«»\r\n]+)»/g, '“$1”');
-  res = res.replace(/"([^"\r\n]+)"/g, '“$1”');
+  // Technical spans must remain byte-for-byte intact while prose is normalized.
+  const protectedSpans = /(```[\s\S]*?(?:```|$)|~~~[\s\S]*?(?:~~~|$)|(?<![\p{L}\p{N}])`[^`\r\n]*`|(?:https?:\/\/|www\.)[^\s<>"“”]+|[\w.+-]+@[\w.-]+\.[a-z]{2,})/giu;
+  return text.split(protectedSpans).map((part, index) => {
+    if (index % 2) return part;
+    let res = part.normalize('NFC');
+    res = res.replace(/«([^«»\r\n]+)»/g, '“$1”');
+    res = res.replace(/"([^"\r\n]+)"/g, '“$1”');
 
-  // 2. Oʻ/Gʻ (any apostrophe variant) → Ō ō Ḡ ḡ (yangi alifbo)
-  // Followed by letters (oʻz → ōz, gʻoya → ḡoya) or word boundary/whitespace/punctuation (togʻ → toḡ)
-  const MACRON = { O: 'Ō', o: 'ō', G: 'Ḡ', g: 'ḡ' };
-  res = res.replace(/([OoGg])['`ʻ‘’´](?=[a-zA-Z\u00C0-\u024F\u1E00-\u1EFF\u0400-\u04FF]|\s|[.,!?;:)]|$)/g, (m, p1) => MACRON[p1]);
+    // Preserve compatibility with the former macron alphabet and apostrophe variants.
+    const letters = { O: 'Ö', o: 'ö', G: 'Ğ', g: 'ğ', Ō: 'Ö', ō: 'ö', Ḡ: 'Ğ', ḡ: 'ğ' };
+    res = res.replace(/[ŌōḠḡ]/g, letter => letters[letter]);
+    res = res.replace(/([OoGg])['`ʻ‘’ʼ´](?=\p{L}|\s|[.,!?;:)\]}»”]|$)/gu, (_, letter) => letters[letter]);
 
-  // 3. Tutuq belgisi with right curly apostrophe ʼ (U+02BC)
-  // Between letters: maʼlumot, sanʼat, masʼul, taʼminlaş, etc.
-  res = res.replace(/([a-zA-Z\u00C0-\u024F\u1E00-\u1EFF\u0400-\u04FF])['`ʻ‘’´]([a-zA-Z\u00C0-\u024F\u1E00-\u1EFF\u0400-\u04FF])/g, '$1ʼ$2');
+    // Tutuq remains U+02BC.
+    res = res.replace(/(\p{L})['`ʻ‘’ʼ´](?=\p{L})/gu, '$1ʼ');
 
-  return res;
+    // The AI prompt handles Ş/Ç: global sh/ch replacement would damage brands and English.
+    return res;
+  }).join('');
 }
 
 export function escapeHtml(str) {
@@ -59,21 +64,21 @@ export default async function handler(req, res) {
         [ { text: '🚀 Işni boşlaş', callback_data: 'status_started' }, { text: '❌ Bekor qiliş', callback_data: 'status_rejected' } ]
       ];
     } else if (data === 'status_started') {
-      alertText = '🚀 Ish boshlandi!';
+      alertText = '🚀 Iş boşlandi!';
       newKeyboard = [
         [ { text: '🔵 HOLAT: BAJARILMOQDA (Jarayonda)', callback_data: 'ignore' } ],
         [ { text: '🏁 Loyihani topşiriş', callback_data: 'status_finished' }, { text: '❌ Bekor qiliş', callback_data: 'status_rejected' } ]
       ];
     } else if (data === 'status_finished') {
-      alertText = '🏁 Loyiha tugatildi, tōlov kutilmoqda!';
+      alertText = '🏁 Loyiha tugatildi, tölov kutilmoqda!';
       newKeyboard = [
-        [ { text: '🟣 HOLAT: YAKUNLANDI (Tōlov kutilmoqda)', callback_data: 'ignore' } ],
-        [ { text: '💵 Tōlov qabul qilindi', callback_data: 'status_paid' } ]
+        [ { text: '🟣 HOLAT: YAKUNLANDI (Tölov kutilmoqda)', callback_data: 'ignore' } ],
+        [ { text: '💵 Tölov qabul qilindi', callback_data: 'status_paid' } ]
       ];
     } else if (data === 'status_paid') {
-      alertText = '🏆 Tōlov olindi. Tabriklaymiz!';
+      alertText = '🏆 Tölov olindi. Tabriklaymiz!';
       newKeyboard = [
-        [ { text: '🏆 HOLAT: TUGATILDI VA TŌLOV OLINDI!', callback_data: 'ignore' } ]
+        [ { text: '🏆 HOLAT: TUGATILDI VA TÖLOV OLINDI!', callback_data: 'ignore' } ]
       ];
     } else if (data === 'status_rejected') {
       alertText = '🔴 Bekor qilindi.';
@@ -127,7 +132,7 @@ export default async function handler(req, res) {
     let replyMarkup = null;
 
     if (text === '/start') {
-      replyText = `Salom, janob MrAstronaut! 👨‍🚀\n\nBiz sizning şaxsiy AI yordamçingiz va CRM boşqaruv markazingiz bōlamiz. Nima xizmat?`;
+      replyText = `Salom, janob MrAstronaut! 👨‍🚀\n\nBiz sizning şaxsiy AI yordamçingiz va CRM boşqaruv markazingiz bölamiz. Nima xizmat?`;
       replyMarkup = {
         keyboard: [
           [{ text: "💬 AI bilan suhbat" }]
@@ -137,7 +142,7 @@ export default async function handler(req, res) {
       };
     } 
     else if (text === '📊 Statistika') {
-      replyText = "Barça buyurtmalar tōḡridan-tōḡri Telegram xabarlari orqali xavfsiz boşqariladi.";
+      replyText = "Barça buyurtmalar töğridan-töğri Telegram xabarlari orqali xavfsiz boşqariladi.";
     }
     else {
       // AI Chat
@@ -160,7 +165,7 @@ export default async function handler(req, res) {
             model: 'mercury-2',
             reasoning_effort: 'low',
             messages: [
-              { role: 'system', content: "Siz MrAstronautning şaxsiy yordamçisisiz. Qisqa va aniq ōzbek tilida javob bering. QATʼIY QOIDA: Ōzbek tili grammatikasi va imlo qoidalariga 100% amal qiling. Faqat yangi ōzbek lotin alifbosida yozing: oʻ, gʻ, sh, ch ōrniga har doim Ō ō, Ḡ ḡ, Ş ş, Ç ç harflarini qōllang (masalan: “ōzbek”, “tōḡri”, “işlaş”, “uçun”). Tutuq belgisini (ʼ) ōz ōrnida va tōḡri şaklda qōllang. Matndagi barça iqtibos va nomlarni standart qōştirnoqlar (“...”) içida bering. Har bir gap va sōz grammatik jihatdan benuqson bōlsin." },
+              { role: 'system', content: "Siz MrAstronautning şaxsiy yordamçisisiz. Qisqa va aniq özbek tilida javob bering. QATʼIY QOIDA: Özbek tili grammatikasi va imlo qoidalariga 100% amal qiling. Faqat yangi özbek lotin alifbosida yozing: Ö ö, Ğ ğ, Ş ş, Ç ç harflarini qöllang (masalan: “özbek”, “töğri”, “işlaş”, “uçun”). Tutuq belgisini (ʼ) öz örnida va töğri şaklda qöllang. Matndagi barça iqtibos va nomlarni standart qöştirnoqlar (“...”) içida bering. Har bir gap va söz grammatik jihatdan benuqson bölsin. Dastur kodi, texnik identifikatorlar, URL manzillari, brend va şaxs nomlari hamda mijoz kiritgan matnni özgartirmang." },
               { role: 'user', content: text }
             ]
           })

@@ -1,19 +1,24 @@
 export function normalizeUzbekOrthography(text) {
   if (!text) return text;
-  // 1. Convert paired quotation marks: "..." and «...» to standard “...” (U+201C / U+201D)
-  let res = text.replace(/«([^«»\r\n]+)»/g, '“$1”');
-  res = res.replace(/"([^"\r\n]+)"/g, '“$1”');
+  // Technical spans must remain byte-for-byte intact while prose is normalized.
+  const protectedSpans = /(```[\s\S]*?(?:```|$)|~~~[\s\S]*?(?:~~~|$)|(?<![\p{L}\p{N}])`[^`\r\n]*`|(?:https?:\/\/|www\.)[^\s<>"“”]+|[\w.+-]+@[\w.-]+\.[a-z]{2,})/giu;
+  return text.split(protectedSpans).map((part, index) => {
+    if (index % 2) return part;
+    let res = part.normalize('NFC');
+    res = res.replace(/«([^«»\r\n]+)»/g, '“$1”');
+    res = res.replace(/"([^"\r\n]+)"/g, '“$1”');
 
-  // 2. Oʻ/Gʻ (any apostrophe variant) → Ō ō Ḡ ḡ (yangi alifbo)
-  // Followed by letters (oʻz → ōz, gʻoya → ḡoya) or word boundary/whitespace/punctuation (togʻ → toḡ)
-  const MACRON = { O: 'Ō', o: 'ō', G: 'Ḡ', g: 'ḡ' };
-  res = res.replace(/([OoGg])['`ʻ‘’´](?=[a-zA-Z\u00C0-\u024F\u1E00-\u1EFF\u0400-\u04FF]|\s|[.,!?;:)]|$)/g, (m, p1) => MACRON[p1]);
+    // Preserve compatibility with the former macron alphabet and apostrophe variants.
+    const letters = { O: 'Ö', o: 'ö', G: 'Ğ', g: 'ğ', Ō: 'Ö', ō: 'ö', Ḡ: 'Ğ', ḡ: 'ğ' };
+    res = res.replace(/[ŌōḠḡ]/g, letter => letters[letter]);
+    res = res.replace(/([OoGg])['`ʻ‘’ʼ´](?=\p{L}|\s|[.,!?;:)\]}»”]|$)/gu, (_, letter) => letters[letter]);
 
-  // 3. Tutuq belgisi with right curly apostrophe ʼ (U+02BC)
-  // Between letters: maʼlumot, sanʼat, masʼul, taʼminlaş, etc.
-  res = res.replace(/([a-zA-Z\u00C0-\u024F\u1E00-\u1EFF\u0400-\u04FF])['`ʻ‘’´]([a-zA-Z\u00C0-\u024F\u1E00-\u1EFF\u0400-\u04FF])/g, '$1ʼ$2');
+    // Tutuq remains U+02BC.
+    res = res.replace(/(\p{L})['`ʻ‘’ʼ´](?=\p{L})/gu, '$1ʼ');
 
-  return res;
+    // The AI prompt handles Ş/Ç: global sh/ch replacement would damage brands and English.
+    return res;
+  }).join('');
 }
 
 export function escapeHtml(str) {
@@ -33,7 +38,7 @@ export default async function handler(req, res) {
   const INCEPTION_API_KEY = (process.env.INCEPTION_API_KEY || '').trim();
 
   if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
-    console.error('Missing config'); return res.status(500).json({ error: 'Serverda vaqtinçalik nosozlik yuz berdi. Iltimos, birozdan sōng qayta urinib kōring.' });
+    console.error('Missing config'); return res.status(500).json({ error: 'Serverda vaqtinçalik nosozlik yuz berdi. Iltimos, birozdan söng qayta urinib köring.' });
   }
 
   const { name, contact, service, budget, message } = req.body || {};
@@ -61,7 +66,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Loyiha haqida xabar kiritilişi şart' });
   }
   if (message.trim().length < 20) {
-    return res.status(400).json({ error: 'Loyiha haqida xabar kamida 20 ta harfdan iborat bōlişi kerak' });
+    return res.status(400).json({ error: 'Loyiha haqida xabar kamida 20 ta harfdan iborat bölişi kerak' });
   }
 
   const cleanName = name.trim().slice(0, 100);
@@ -90,16 +95,16 @@ export default async function handler(req, res) {
   let aiAnalysis = '<i>AI tahlili mavjud emas.</i>';
   try {
     const aiPrompt = `Siz qobiliyatli IT konsultantsiz. MrAstronaut ismli frilanserga yordam beryapsiz.
-Yangi mijoz quyidagi loyiha sōrovini yubordi:
+Yangi mijoz quyidagi loyiha sörovini yubordi:
 - Xizmat turi: ${cleanService}
 - Byudjet: ${cleanBudget}
 - Mijozning xabari: ${cleanMessage}
 
-Iltimos, uşbu mijoz sōrovini tahlil qilib, qisqa 3–4 ta band (nuqtaçalar) bilan quyidagilarni ōzbek tilida yozing:
+Iltimos, uşbu mijoz sörovini tahlil qilib, qisqa 3–4 ta band (nuqtaçalar) bilan quyidagilarni özbek tilida yozing:
 1. Loyiha uçun qaysi texnologiyalar (Tech Stack) eng mos keladi?
-2. Boşlanḡiç narxni qanday aytiş va qanday sotiş strategiyasini qōllaş kerak?
+2. Boşlanğiç narxni qanday aytiş va qanday sotiş strategiyasini qöllaş kerak?
 3. Mijozning xabaridagi asosiy xavf yoki talab nima?
-Faqat aniq faktlar va maslahat bōlsin. Heç qanday salomlaşişsiz, tōḡridan-tōḡri tahlilni yozing. QATʼIY QOIDA: Ōzbek tili grammatikasi va imlo qoidalariga 100% amal qiling. Faqat yangi ōzbek lotin alifbosida yozing: oʻ, gʻ, sh, ch ōrniga har doim Ō ō, Ḡ ḡ, Ş ş, Ç ç harflarini qōllang (masalan: “ōzbek”, “tōḡri”, “işlaş”, “uçun”). Tutuq belgisini (ʼ) ōz ōrnida va tōḡri şaklda qōllang. Matndagi barça iqtibos va nomlarni standart qōştirnoqlar (“...”) içida bering. Har bir gap va sōz grammatik jihatdan benuqson bōlsin.`;
+Faqat aniq faktlar va maslahat bölsin. Heç qanday salomlaşişsiz, töğridan-töğri tahlilni yozing. QATʼIY QOIDA: Özbek tili grammatikasi va imlo qoidalariga 100% amal qiling. Faqat yangi özbek lotin alifbosida yozing: Ö ö, Ğ ğ, Ş ş, Ç ç harflarini qöllang (masalan: “özbek”, “töğri”, “işlaş”, “uçun”). Tutuq belgisini (ʼ) öz örnida va töğri şaklda qöllang. Matndagi barça iqtibos va nomlarni standart qöştirnoqlar (“...”) içida bering. Har bir gap va söz grammatik jihatdan benuqson bölsin. Dastur kodi, texnik identifikatorlar, URL manzillari, brend va şaxs nomlari hamda mijoz kiritgan matnni özgartirmang.`;
 
     const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
     const timeout = controller ? setTimeout(() => controller.abort(), 4000) : null;
@@ -143,11 +148,12 @@ Faqat aniq faktlar va maslahat bōlsin. Heç qanday salomlaşişsiz, tōḡridan
   }
 
   // --- BUILD TELEGRAM MESSAGE ---
-  const safeName = normalizeUzbekOrthography(escapeHtml(cleanName));
+  // Preserve customer spelling, names, technical identifiers and quoted requirements.
+  const safeName = escapeHtml(cleanName);
   const safeContact = escapeHtml(formattedContact);
-  const safeService = normalizeUzbekOrthography(escapeHtml(cleanService));
-  const safeBudget = normalizeUzbekOrthography(escapeHtml(cleanBudget));
-  const safeMessage = normalizeUzbekOrthography(escapeHtml(cleanMessage));
+  const safeService = escapeHtml(cleanService);
+  const safeBudget = escapeHtml(cleanBudget);
+  const safeMessage = escapeHtml(cleanMessage);
 
   const text = `
 🆕 <b>YANGI BUYURTMA</b>
@@ -192,7 +198,7 @@ ${aiAnalysis}
       return res.status(200).json({ success: true });
     } else {
       console.error('Telegram API error:', data);
-      return res.status(502).json({ error: 'Xizmat vaqtinça faol emas. Iltimos, keyinroq urinib kōring.' });
+      return res.status(502).json({ error: 'Xizmat vaqtinça faol emas. Iltimos, keyinroq urinib köring.' });
     }
   } catch (error) {
     return res.status(500).json({ error: 'Xabarni yuborişda xatolik yuz berdi' });
