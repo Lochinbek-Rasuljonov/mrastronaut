@@ -41,37 +41,19 @@ export default async function handler(req, res) {
     console.error('Missing config'); return res.status(500).json({ error: 'Serverda vaqtinçalik nosozlik yuz berdi. Iltimos, birozdan söng qayta urinib köring.' });
   }
 
-  const { name, contact, service, budget, message } = req.body || {};
+  const { name, contact, message } = req.body || {};
 
   if (!name || !name.trim()) {
     return res.status(400).json({ error: 'Ism kiritilişi şart' });
   }
   if (!contact || !contact.trim()) {
-    return res.status(400).json({ error: 'Telegram aloqa maʼlumoti kiritilişi şart' });
-  }
-  const invalidServicePlaceholders = [
-    'tanlanmadi',
-    'xizmat turini tanlang...',
-    'хизмат турини танланг...',
-    'выберите услугу...',
-    'select a service...'
-  ];
-  if (!service || !service.trim() || invalidServicePlaceholders.includes(service.trim().toLowerCase())) {
-    return res.status(400).json({ error: 'Xizmat turi tanlanişi şart' });
-  }
-  if (!budget || !budget.trim()) {
-    return res.status(400).json({ error: 'Taxminiy byudjet kiritilişi şart' });
+    return res.status(400).json({ error: 'Telegram yoki telefon raqami kiritilişi şart' });
   }
   if (!message || !message.trim()) {
-    return res.status(400).json({ error: 'Loyiha haqida xabar kiritilişi şart' });
-  }
-  if (message.trim().length < 20) {
-    return res.status(400).json({ error: 'Loyiha haqida xabar kamida 20 ta harfdan iborat bölişi kerak' });
+    return res.status(400).json({ error: 'Nima kerakligini yoziş şart' });
   }
 
   const cleanName = name.trim().slice(0, 100);
-  const cleanService = service.trim().slice(0, 100);
-  const cleanBudget = budget.trim().slice(0, 100);
   const cleanMessage = message.trim().slice(0, 3000);
 
   // Validate and build contact URL safely to avoid Telegram BUTTON_URL_INVALID errors
@@ -96,8 +78,6 @@ export default async function handler(req, res) {
   try {
     const aiPrompt = `Siz qobiliyatli IT konsultantsiz. MrAstronaut ismli frilanserga yordam beryapsiz.
 Yangi mijoz quyidagi loyiha sörovini yubordi:
-- Xizmat turi: ${cleanService}
-- Byudjet: ${cleanBudget}
 - Mijozning xabari: ${cleanMessage}
 
 Iltimos, uşbu mijoz sörovini tahlil qilib, qisqa 3–4 ta band (nuqtaçalar) bilan quyidagilarni özbek tilida yozing:
@@ -151,17 +131,13 @@ Faqat aniq faktlar va maslahat bölsin. Heç qanday salomlaşişsiz, töğridan-
   // Preserve customer spelling, names, technical identifiers and quoted requirements.
   const safeName = escapeHtml(cleanName);
   const safeContact = escapeHtml(formattedContact);
-  const safeService = escapeHtml(cleanService);
-  const safeBudget = escapeHtml(cleanBudget);
   const safeMessage = escapeHtml(cleanMessage);
 
   const text = `
 🆕 <b>YANGI BUYURTMA</b>
 
 👤 <b>Ism:</b> ${safeName}
-📞 <b>Telegram:</b> ${safeContact}
-💼 <b>Xizmat turi:</b> ${safeService}
-💰 <b>Byudjet:</b> ${safeBudget}
+📞 <b>Aloqa:</b> ${safeContact}
 
 📝 <b>Qisqaça maʼlumot:</b>
 <i>${safeMessage}</i>

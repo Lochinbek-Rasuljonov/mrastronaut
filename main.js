@@ -244,31 +244,12 @@ function showToast(isSuccess=true, customMsg=null){
 window.showToast = showToast;
 function validate(){
   let ok=true;
-  ['f-name','f-contact','f-service','f-budget','f-msg'].forEach(id=>{
+  ['f-name','f-contact','f-msg'].forEach(id=>{
     const inp=document.getElementById(id);
     if(!inp) return;
     const field=inp.closest('.field');
     const val = inp.value.trim();
-    let isValid = val !== '';
-    if (id === 'f-service') {
-      const ddSel = document.querySelector('#service-dropdown .dropdown-selected');
-      const curLang = document.querySelector('.lang-btn.active')?.dataset.lang || 'uz';
-      const placeholderText = ddSel ? ((typeof T !== 'undefined' && T[curLang] && T[curLang]['f_sel']) || 'Xizmat turini tanlang...') : '';
-      const invalidPlaceholders = [
-        placeholderText.toLowerCase(),
-        'tanlanmadi',
-        'xizmat turini tanlang...',
-        'хизмат турини танланг...',
-        'выберите услугу...',
-        'select a service...'
-      ];
-      if (!val || invalidPlaceholders.includes(val.toLowerCase())) {
-        isValid = false;
-      }
-    }
-    if (id === 'f-msg' && val.length < 20) {
-      isValid = false;
-    }
+    const isValid = val !== '';
     if(!isValid){
       field.classList.add('has-error');
       ok=false;
@@ -279,40 +260,20 @@ function validate(){
   return ok;
 }
 if(form){
-  ['f-name','f-contact','f-budget','f-msg'].forEach(id=>{
+  ['f-name','f-contact','f-msg'].forEach(id=>{
     const el = document.getElementById(id);
     if(!el) return;
     el.addEventListener('input',function(){
       const val = this.value.trim();
-      let valid = val !== '';
-      if(id === 'f-msg') valid = val.length >= 20;
+      const valid = val !== '';
       if(valid) this.closest('.field').classList.remove('has-error');
     });
     el.addEventListener('blur',function(){
       const val = this.value.trim();
-      let valid = val !== '';
-      if(id === 'f-msg') valid = val.length >= 20;
+      const valid = val !== '';
       if(!valid) this.closest('.field').classList.add('has-error');
     });
   });
-
-  const ddContainer = document.getElementById('service-dropdown');
-  if (ddContainer) {
-    ddContainer.addEventListener('focusout', function(e) {
-      setTimeout(() => {
-        if (!ddContainer.contains(document.activeElement)) {
-          const hid = document.getElementById('f-service');
-          const val = (hid?.value || '').trim();
-          const curLang = document.querySelector('.lang-btn.active')?.dataset.lang || 'uz';
-          const placeholder = (typeof T !== 'undefined' && T[curLang] && T[curLang]['f_sel']) || 'Xizmat turini tanlang...';
-          const isInvalid = !val || val === 'Tanlanmadi' || val.toLowerCase() === placeholder.toLowerCase();
-          if (isInvalid) {
-            ddContainer.closest('.field')?.classList.add('has-error');
-          }
-        }
-      }, 50);
-    });
-  }
 
   form.addEventListener('submit', async e => {
     e.preventDefault();
@@ -328,8 +289,6 @@ if(form){
     
     const name = document.getElementById('f-name').value.trim();
     const contact = document.getElementById('f-contact').value.trim();
-    const service = document.getElementById('f-service').value.trim() || 'Tanlanmadi';
-    const budget = (document.getElementById('f-budget')?.value || '').trim();
     const msg = document.getElementById('f-msg').value.trim();
 
     let isOk = false;
@@ -341,7 +300,7 @@ if(form){
       const resp = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, contact, service, budget, message: msg }),
+        body: JSON.stringify({ name, contact, message: msg }),
         signal: controller ? controller.signal : undefined
       });
       if (timeoutId) clearTimeout(timeoutId);
@@ -399,17 +358,6 @@ if(form){
     if (isOk) {
       form.reset();
       document.querySelectorAll('.field.has-error').forEach(f => f.classList.remove('has-error'));
-      const selectedDd = document.querySelector('.dropdown-selected');
-      if (selectedDd) {
-        selectedDd.dataset.key = 'f_sel';
-        selectedDd.classList.remove('has-val');
-        selectedDd.setAttribute('aria-expanded', 'false');
-        selectedDd.textContent = finishT['f_sel'] || (typeof T !== 'undefined' && T.uz && T.uz['f_sel']) || 'Xizmat turini tanlang...';
-      }
-      const hiddenService = document.getElementById('f-service');
-      if (hiddenService) {
-        hiddenService.value = '';
-      }
       showToast(true);
     } else {
       if (!customErrorMsg) {
@@ -455,107 +403,6 @@ if (bgVideo) {
 }
 
 })();
-
-/* ── CUSTOM DROPDOWN ───────────────────────────────────── */
-const dd = document.getElementById('service-dropdown');
-if (dd) {
-  const selected = dd.querySelector('.dropdown-selected');
-  const opts = dd.querySelectorAll('.dropdown-opt');
-  const hiddenInput = document.getElementById('f-service');
-  const label = document.querySelector('label[for="f-service"]');
-
-  function openDropdown() {
-    dd.classList.add('open');
-    selected.setAttribute('aria-expanded', 'true');
-  }
-
-  function closeDropdown() {
-    dd.classList.remove('open');
-    selected.setAttribute('aria-expanded', 'false');
-  }
-
-  function toggleDropdown() {
-    if (dd.classList.contains('open')) {
-      closeDropdown();
-    } else {
-      openDropdown();
-    }
-  }
-
-  function selectOption(opt) {
-    selected.dataset.key = opt.dataset.key;
-    selected.textContent = opt.textContent;
-    selected.classList.add('has-val');
-    hiddenInput.value = opt.textContent; // Using textContent so it sends natural text to TG
-    closeDropdown();
-    selected.closest('.field').classList.remove('has-error');
-    selected.focus();
-  }
-
-  selected.addEventListener('click', (e) => {
-    e.stopPropagation();
-    toggleDropdown();
-  });
-
-  selected.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-      e.preventDefault();
-      if (!dd.classList.contains('open')) {
-        openDropdown();
-        opts[0]?.focus();
-      } else {
-        closeDropdown();
-      }
-    } else if (e.key === 'Escape') {
-      closeDropdown();
-    }
-  });
-
-  if (label) {
-    label.addEventListener('click', (e) => {
-      e.preventDefault();
-      selected.focus();
-      toggleDropdown();
-    });
-  }
-
-  opts.forEach((opt, idx) => {
-    opt.addEventListener('click', (e) => {
-      e.stopPropagation();
-      selectOption(opt);
-    });
-
-    opt.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        e.stopPropagation();
-        selectOption(opt);
-      } else if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        const next = opts[idx + 1] || opts[0];
-        next.focus();
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        const prev = opts[idx - 1] || opts[opts.length - 1];
-        prev.focus();
-      } else if (e.key === 'Escape') {
-        e.preventDefault();
-        closeDropdown();
-        selected.focus();
-      }
-    });
-  });
-
-  document.addEventListener('click', () => {
-    closeDropdown();
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && dd.classList.contains('open')) {
-      closeDropdown();
-    }
-  });
-}
 
 // Music Toggle Logic
 document.addEventListener('DOMContentLoaded', () => {

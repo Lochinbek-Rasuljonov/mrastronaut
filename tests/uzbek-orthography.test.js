@@ -78,7 +78,7 @@ test('contact: new alphabet is used for AI prose while submitted spelling and HT
   const res = response();
   await contactHandler({
     method: 'POST',
-    body: { name: "O'Connor", contact: '@shopify_user', service: 'Shopify checkout', budget: '$100', message },
+    body: { name: "O'Connor", contact: '@shopify_user', message },
   }, res);
 
   assert.equal(res.statusCode, 200);
