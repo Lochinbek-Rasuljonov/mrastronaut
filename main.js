@@ -34,7 +34,6 @@ const sectionNavMap = {
   'services': '#services',
   'process': '#services',
   'why-us': '#why-us',
-  'urgency': '#why-us',
   'faq': '#why-us',
   'contact': '#contact'
 };
